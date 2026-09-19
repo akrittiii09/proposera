@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ProposalRecord } from "@/lib/db/repositories";
+import PaywallCard from "@/components/billing/PaywallCard";
 
 export interface ProposalResponseItem {
   id: string;
@@ -20,11 +21,12 @@ interface ProposalSettingsProps {
 
 export default function ProposalSettingsClient({
   proposal: initialProposal,
-  isEntitled,
+  isEntitled: initialIsEntitled,
   initialResponses = [],
 }: ProposalSettingsProps) {
   const router = useRouter();
   const [proposal, setProposal] = useState<ProposalRecord>(initialProposal);
+  const [entitled, setEntitled] = useState(initialIsEntitled);
   const [responses] = useState<ProposalResponseItem[]>(initialResponses);
   const [slug, setSlug] = useState(proposal.slug);
   const [slugSaving, setSlugSaving] = useState(false);
@@ -250,18 +252,24 @@ export default function ProposalSettingsClient({
             </div>
           )}
 
-          {!isEntitled && (
-            <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4 text-xs text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/40 dark:text-amber-300">
-              <span className="font-bold">Paywall Notice:</span> Your account currently has an INACTIVE entitlement. Publishing is locked until an active entitlement is acquired.
-            </div>
-          )}
+          <div className="mt-4">
+            <PaywallCard
+              isEntitled={entitled}
+              onEntitled={() => {
+                setEntitled(true);
+                setPublishError(null);
+                router.refresh();
+              }}
+            />
+          </div>
 
           <div className="mt-6 flex flex-wrap items-center gap-3">
             {proposal.status !== "PUBLISHED" ? (
               <button
                 type="button"
                 onClick={() => handlePublishToggle("publish")}
-                disabled={publishing}
+                disabled={publishing || !entitled}
+                title={!entitled ? "An active entitlement is required to publish." : undefined}
                 className="rounded-lg bg-emerald-600 px-5 py-2 text-xs font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50"
               >
                 {publishing ? "Processing..." : "Publish Proposal"}

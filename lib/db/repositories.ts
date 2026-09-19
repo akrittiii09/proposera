@@ -53,6 +53,8 @@ export interface CreatorEntitlementRecord {
   status: EntitlementStatus;
   provider: string;
   external_reference: string | null;
+  order_id: string | null;
+  payment_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -419,36 +421,42 @@ export function createOrUpdateEntitlement(
     status: EntitlementStatus;
     provider?: string;
     externalReference?: string | null;
+    orderId?: string | null;
+    paymentId?: string | null;
   }
 ): CreatorEntitlementRecord {
   const existing = findEntitlementByCreatorId(db, data.creatorId);
   const now = new Date().toISOString();
   const provider = data.provider || "RAZORPAY";
-  const externalRef = data.externalReference !== undefined ? data.externalReference : null;
+  const externalRef = data.externalReference !== undefined ? data.externalReference : (existing?.external_reference ?? null);
+  const orderId = data.orderId !== undefined ? data.orderId : (existing?.order_id ?? null);
+  const paymentId = data.paymentId !== undefined ? data.paymentId : (existing?.payment_id ?? null);
 
   if (existing) {
     const stmt = db.prepare(`
       UPDATE creator_entitlements
-      SET status = ?, provider = ?, external_reference = ?, updated_at = ?
+      SET status = ?, provider = ?, external_reference = ?, order_id = ?, payment_id = ?, updated_at = ?
       WHERE creator_id = ?
     `);
-    stmt.run(data.status, provider, externalRef, now, data.creatorId);
+    stmt.run(data.status, provider, externalRef, orderId, paymentId, now, data.creatorId);
 
     return {
       ...existing,
       status: data.status,
       provider,
       external_reference: externalRef,
+      order_id: orderId,
+      payment_id: paymentId,
       updated_at: now,
     };
   } else {
     const id = crypto.randomUUID();
     const stmt = db.prepare(`
       INSERT INTO creator_entitlements (
-        id, creator_id, status, provider, external_reference, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?)
+        id, creator_id, status, provider, external_reference, order_id, payment_id, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
-    stmt.run(id, data.creatorId, data.status, provider, externalRef, now, now);
+    stmt.run(id, data.creatorId, data.status, provider, externalRef, orderId, paymentId, now, now);
 
     return {
       id,
@@ -456,6 +464,8 @@ export function createOrUpdateEntitlement(
       status: data.status,
       provider,
       external_reference: externalRef,
+      order_id: orderId,
+      payment_id: paymentId,
       created_at: now,
       updated_at: now,
     };
@@ -468,6 +478,24 @@ export function findEntitlementByCreatorId(
 ): CreatorEntitlementRecord | null {
   const stmt = db.prepare("SELECT * FROM creator_entitlements WHERE creator_id = ?");
   const row = stmt.get(creatorId) as unknown as CreatorEntitlementRecord | undefined;
+  return row || null;
+}
+
+export function findEntitlementByOrderId(
+  db: DatabaseSync,
+  orderId: string
+): CreatorEntitlementRecord | null {
+  const stmt = db.prepare("SELECT * FROM creator_entitlements WHERE order_id = ?");
+  const row = stmt.get(orderId) as unknown as CreatorEntitlementRecord | undefined;
+  return row || null;
+}
+
+export function findEntitlementByPaymentId(
+  db: DatabaseSync,
+  paymentId: string
+): CreatorEntitlementRecord | null {
+  const stmt = db.prepare("SELECT * FROM creator_entitlements WHERE payment_id = ?");
+  const row = stmt.get(paymentId) as unknown as CreatorEntitlementRecord | undefined;
   return row || null;
 }
 

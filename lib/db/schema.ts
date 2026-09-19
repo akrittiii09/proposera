@@ -59,12 +59,16 @@ CREATE TABLE IF NOT EXISTS creator_entitlements (
   status TEXT NOT NULL DEFAULT 'INACTIVE' CHECK (status IN ('ACTIVE', 'INACTIVE', 'TRIAL')),
   provider TEXT NOT NULL DEFAULT 'RAZORPAY',
   external_reference TEXT,
+  order_id TEXT,
+  payment_id TEXT,
   created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL,
   FOREIGN KEY (creator_id) REFERENCES creators (id) ON DELETE CASCADE
 );
 
 CREATE INDEX IF NOT EXISTS idx_entitlements_creator_id ON creator_entitlements (creator_id);
+CREATE INDEX IF NOT EXISTS idx_entitlements_order_id ON creator_entitlements (order_id);
+CREATE INDEX IF NOT EXISTS idx_entitlements_payment_id ON creator_entitlements (payment_id);
 
 -- Server-side Sessions table
 CREATE TABLE IF NOT EXISTS sessions (
