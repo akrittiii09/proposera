@@ -85,8 +85,9 @@ export type PublishActionInput = z.infer<typeof PublishActionSchema>;
 
 /**
  * Recipient Response Submission Schema (Persisted responses per DEC-002 / Q2).
+ * Note length capped at 500 characters per Milestone 4 specification.
  */
-export const SubmitResponseSchema = z.object({
+export const CreateResponseSchema = z.object({
   choice: z
     .string()
     .trim()
@@ -95,9 +96,12 @@ export const SubmitResponseSchema = z.object({
   customNote: z
     .string()
     .trim()
-    .max(1000, "Custom note cannot exceed 1000 characters")
+    .max(500, "Custom note cannot exceed 500 characters")
     .nullable()
     .optional(),
 });
 
-export type SubmitResponseInput = z.infer<typeof SubmitResponseSchema>;
+export type CreateResponseInput = z.infer<typeof CreateResponseSchema>;
+
+export const SubmitResponseSchema = CreateResponseSchema;
+export type SubmitResponseInput = CreateResponseInput;

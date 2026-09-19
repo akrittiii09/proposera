@@ -1,7 +1,11 @@
 import { notFound } from "next/navigation";
 import { requireAuth } from "@/lib/auth/requireAuth";
 import { getDb } from "@/lib/db";
-import { findProposalById, isCreatorEntitled } from "@/lib/db/repositories";
+import {
+  findProposalById,
+  isCreatorEntitled,
+  findResponsesByProposalId,
+} from "@/lib/db/repositories";
 import ProposalSettingsClient from "@/components/proposals/ProposalSettingsClient";
 
 interface ProposalSettingsPageProps {
@@ -23,6 +27,20 @@ export default async function ProposalSettingsPage({ params }: ProposalSettingsP
   }
 
   const entitled = isCreatorEntitled(db, creator.id);
+  const rawResponses = findResponsesByProposalId(db, id, creator.id) || [];
 
-  return <ProposalSettingsClient proposal={proposal} isEntitled={entitled} />;
+  const initialResponses = rawResponses.map((r) => ({
+    id: r.id,
+    choice: r.choice,
+    custom_note: r.custom_note,
+    created_at: r.created_at,
+  }));
+
+  return (
+    <ProposalSettingsClient
+      proposal={proposal}
+      isEntitled={entitled}
+      initialResponses={initialResponses}
+    />
+  );
 }

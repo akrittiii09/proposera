@@ -5,17 +5,27 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ProposalRecord } from "@/lib/db/repositories";
 
+export interface ProposalResponseItem {
+  id: string;
+  choice: string;
+  custom_note: string | null;
+  created_at: string;
+}
+
 interface ProposalSettingsProps {
   proposal: ProposalRecord;
   isEntitled: boolean;
+  initialResponses?: ProposalResponseItem[];
 }
 
 export default function ProposalSettingsClient({
   proposal: initialProposal,
   isEntitled,
+  initialResponses = [],
 }: ProposalSettingsProps) {
   const router = useRouter();
   const [proposal, setProposal] = useState<ProposalRecord>(initialProposal);
+  const [responses] = useState<ProposalResponseItem[]>(initialResponses);
   const [slug, setSlug] = useState(proposal.slug);
   const [slugSaving, setSlugSaving] = useState(false);
   const [slugError, setSlugError] = useState<string | null>(null);
@@ -267,6 +277,60 @@ export default function ProposalSettingsClient({
               </button>
             )}
           </div>
+        </div>
+
+        {/* Persisted Recipient Responses Section (DEC-002 / Q2) */}
+        <div className="rounded-xl border border-neutral-200 bg-white p-6 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h2 className="text-base font-semibold text-neutral-900 dark:text-white">
+                Recipient Responses
+              </h2>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">
+                Responses submitted by your partner on your published proposal link.
+              </p>
+            </div>
+            <span className="rounded-full bg-rose-50 px-2.5 py-0.5 text-xs font-semibold text-rose-700 dark:bg-rose-950/60 dark:text-rose-300">
+              {responses.length} {responses.length === 1 ? "Response" : "Responses"}
+            </span>
+          </div>
+
+          {responses.length === 0 ? (
+            <div className="rounded-xl border border-dashed border-neutral-200 p-8 text-center dark:border-neutral-800">
+              <div className="text-2xl mb-2">💌</div>
+              <p className="text-xs font-medium text-neutral-600 dark:text-neutral-400">
+                No responses recorded yet.
+              </p>
+              <p className="text-[11px] text-neutral-400 dark:text-neutral-500 mt-1">
+                When your partner answers your proposal on the live link, their answer and note will appear here.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {responses.map((resp) => (
+                <div
+                  key={resp.id}
+                  className="rounded-xl border border-neutral-200 bg-neutral-50/60 p-4 dark:border-neutral-800 dark:bg-neutral-800/40"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="inline-flex items-center gap-1.5 rounded-md bg-emerald-100 px-2.5 py-1 text-xs font-bold text-emerald-800 dark:bg-emerald-950/70 dark:text-emerald-300">
+                      <span>💍</span>
+                      <span>{resp.choice}</span>
+                    </span>
+                    <span className="text-[11px] text-neutral-400 font-mono">
+                      {new Date(resp.created_at).toLocaleString()}
+                    </span>
+                  </div>
+
+                  {resp.custom_note && (
+                    <div className="mt-3 rounded-lg border border-neutral-200/80 bg-white p-3 text-xs italic text-neutral-700 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300">
+                      &ldquo;{resp.custom_note}&rdquo;
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Danger Zone: Soft Delete */}
