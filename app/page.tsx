@@ -7,7 +7,21 @@ export default function Home() {
           Personalized proposal-experience platform.
         </p>
         <div className="inline-block rounded-full bg-neutral-100 px-3 py-1 text-xs font-medium text-neutral-800 dark:bg-neutral-800 dark:text-neutral-200">
-          Phase 0: Engineering Foundation Active
+          Phase 2: Creator Authentication Foundation Active
+        </div>
+        <div className="flex justify-center gap-3 pt-2">
+          <a
+            href="/login"
+            className="rounded-lg border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
+          >
+            Sign In
+          </a>
+          <a
+            href="/register"
+            className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-700"
+          >
+            Create Account
+          </a>
         </div>
       </div>
     </main>
