@@ -17,17 +17,20 @@ All items below originate directly from owner instructions, prompt constraints, 
 4. **Authoritative Server-Side Validation & Auth**: Zero trust in client validation alone; strict ownership verification on every creator endpoint; drafts and unpublished proposals return an identical 404 to unauthenticated outsiders. *(Source: Phase 1 Prompt, Section 3)*
 5. **Non-Manipulative & Accessible Response**: Proposal response interaction prohibits deceptive mechanics (no fleeing buttons) and strictly supports accessible controls and reduced motion. *(Source: Phase 1 Prompt, Section 3)*
 6. **Mobile-First Sensory Baseline**: Recipient experience is engineered primarily for mobile phone viewports (360px–430px) with touch targets $\ge 48\times 48\text{ px}$. *(Source: Phase 1 Prompt, Section 3)*
+7. **Public Creator Signup with Paywall (DEC-008 / Q1)**: Creators may publicly sign up. Access to paid publishing functionality is gated by a Razorpay paywall. Razorpay is the owner-selected provider; concrete payment implementation is deferred to Phase 2+. *(Source: Owner Decision Q1)*
+8. **Persisted Recipient Responses (DEC-002 / Q2)**: Recipient responses (affirmative choice, timestamp, optional message) MUST be stored in the database and visible to the creator in Creator Studio. *(Source: Owner Decision Q2)*
+9. **Public Proposal Access via Secret URL (DEC-009 / Q3)**: Recipient accesses proposal via unguessable random slug (`/p/[slug]`) without authentication (no recipient login/accounts/passwords). Creator DOES authenticate. *(Source: Owner Decision Q3)*
+10. **Live Mutable Published Proposals (DEC-007 / Q4)**: Published proposals are live and mutable. Edits immediately update the published experience upon saving. Immutable publication snapshots are explicitly REJECTED for MVP. Proposal version history/rollback is DEFERRED. *(Source: Owner Decision Q4)*
 
 ---
 
 ## 2. What Was Proposed
 
 ### 2.1 ONE-WAY Decisions (Listed First)
-- **Immutable Publication Snapshot Model (DEC-007)**: Publishing freezes an immutable `PublicationSnapshot`. Public traffic resolves against snapshots, isolating active recipient delivery from in-flight creator draft edits.
 - **Relational Aggregate with Document Content (DEC-010)**: Core metadata (`Proposal`, `Creator`, `MediaAsset`, `Response`) stored in relational tables, with narrative story milestones stored as structured, versioned JSON documents.
+- **Scene-Based Flow Architecture (DEC-006)**: Recipient presentation structured as a progressive state-machine scene flow (`Intro -> Timeline -> Reveal Climax -> Response -> Celebration`).
 
 ### 2.2 Reversible / Costly Decisions
-- **Scene-Based Flow Architecture (DEC-006)**: Recipient presentation structured as a progressive state-machine scene flow (`Intro -> Timeline -> Reveal Climax -> Response -> Celebration`).
 - **Dedicated Recipient Route Namespace (DEC-008)**: Dedicated `/p/[slug]` route pattern to avoid collisions with system routes and enable clean edge caching.
 - **Strict Non-Disclosing 404 Policy (DEC-009)**: Draft, unpublished, deleted, and non-existent proposals return an identical generic error page to preserve relationship privacy.
 - **Candidate Full-Stack Technology Stack (DEC-010)**: Next.js (TypeScript), Neon Serverless PostgreSQL, Cloudflare R2 object storage with CDN.
@@ -38,11 +41,14 @@ All items below originate directly from owner instructions, prompt constraints, 
 
 | Item | Target Phase | Dependency / Reason |
 | :--- | :--- | :--- |
-| **Creator Authentication & Session Implementation** | Phase 2 | Depends on Q1 signup policy decision. |
-| **Database Migrations & ORM Implementation** | Phase 2 | Depends on Q4 snapshot model confirmation. |
+| **Creator Authentication & Session Implementation** | Phase 2 | Concrete implementation deferred to Phase 2 (Public signup decided in Q1). |
+| **Database Migrations & ORM Implementation** | Phase 2 | Concrete implementation deferred to Phase 2 (Live mutable model decided in Q4). |
+| **Razorpay Payment Gateway Integration & Webhooks** | Phase 2+ | Provider selected (Razorpay); commercialization details (Q1-A) pending owner decision. |
 | **Media Upload Worker & Ingestion Pipeline** | Phase 6 | Requires object store provisioning and API scaffolding. |
 | **Ambient Music Engine & Autoplay Handler** | Phase 7 | Depends on Q5 audio source decision. |
 | **Playful Micro-Interactions (Scratch/Flip)** | Phase 8 | Non-blocking narrative enhancement. |
+| **Proposal Version History, Rollback & Snapshots** | Phase 9+ | Snapshot model rejected for MVP (DEC-007 / Q4); deferred to future enterprise tier. |
+| **Optional Recipient Passcode Protection** | Phase 9+ | Secret slug sufficient for MVP (DEC-009 / Q3); optional PIN protection deferred. |
 | **Collaborative Proposal Co-Authoring** | Phase 12 | Out of scope for single-creator MVP. |
 | **Custom Domain Mapping (CNAME)** | Phase 13 | Advanced feature requiring wildcard SSL management. |
 | **Video Ingestion & Transcoding** | Phase 14 | Bandwidth and transcoding costs exceed MVP scope. |
@@ -66,9 +72,9 @@ All files are created exclusively under `docs/` in accordance with Section 9:
 
 ## 5. Architectural Tradeoffs
 
-1. **Snapshot-Based Publishing vs. Single Mutable Row**:
-   - *Chosen*: Immutable snapshots.
-   - *Tradeoff*: Slightly more complex schema logic, but guarantees that in-flight creator edits never break a partner's live proposal experience.
+1. **Live Mutable Proposals vs. Snapshot-Based Publishing**:
+   - *Chosen*: Live Mutable Publishing (DEC-007 / Q4).
+   - *Tradeoff*: Edits to published proposals update the live `/p/[slug]` route immediately upon saving. Provides a simpler database schema and lower operational complexity for MVP. Snapshot version history and rollback are deferred to Phase 9+.
 2. **Document-Based Content vs. Fully Normalized Tables**:
    - *Chosen*: Structured JSON content document with relational root aggregates.
    - *Tradeoff*: Querying individual milestone properties across all proposals is less relational, but ordering, editing, and versioning a cohesive story narrative is atomic and drift-free.
@@ -80,11 +86,14 @@ All files are created exclusively under `docs/` in accordance with Section 9:
 
 ## 6. Open Questions Register
 
-The following open questions are registered in `docs/DECISIONS.md` awaiting owner decision:
-- **Q1**: Creator signup policy (Proposed default: Invite-only initial cohort).
-- **Q2**: Recipient response persistence (Proposed default: Persisted to DB with Studio indicator).
-- **Q3**: Public link slug model (Proposed default: Unguessable default with optional vanity override, global `noindex`).
-- **Q4**: Edit-after-publish mechanics (Proposed default: Snapshot-based publishing).
+The following questions have been resolved by owner decisions:
+- **Q1 (Creator Signup)**: **DECIDED**. Public creator signup with paywall. Razorpay selected; concrete implementation deferred to Phase 2+.
+- **Q2 (Response Persistence)**: **DECIDED**. Recipient responses must be persisted and visible to creator in Creator Studio.
+- **Q3 (Public Proposal Access)**: **DECIDED**. Public proposal access via secret unguessable URL; zero recipient authentication (no accounts/passwords/PINs). Creator authenticates.
+- **Q4 (Edit After Publish)**: **DECIDED**. Published proposals are live and mutable. Edits immediately update live view. Immutable snapshots rejected for MVP.
+
+The following open questions remain awaiting owner decision:
+- **Q1-A**: Razorpay commercialization details (pricing tiers, currency, billing model).
 - **Q5**: Music source policy (Proposed default: Curated royalty-free ambient tracks in MVP).
 - **Q6**: Supported device and browser baseline (Proposed default: Modern mobile Safari/Chrome, evergreen desktop).
 - **Q7**: Language and script scope (Proposed default: English UI, arbitrary UTF-8 narrative text).
@@ -106,19 +115,20 @@ The following open questions are registered in `docs/DECISIONS.md` awaiting owne
 
 ---
 
-## 8. Tests & Baseline Checks Executed
+## 8. Dependencies Added, If Any
 
-- **Read-Only Baseline Inspection**: Evaluated package manifests and test scripts. Result: Clean repository, 0 packages installed, 0 failures.
-- **Git Status & Integrity**: Verified `git status --porcelain` and `git diff --stat`. 0 tracked files were modified.
-- **Formatting & Whitespace Check**: Verified `git diff --no-index --check` on all newly created documentation files. 0 whitespace or formatting errors.
-- **Secret Scan**: Grep scan across `docs/` confirmed zero credentials, access tokens, or private keys.
+**NONE**. In accordance with Phase 1 constraints, zero dependencies were installed or added to `package.json`.
 
 ---
 
-## 9. Proposed Phase 0 File Edits
+## 9. Tests & Baseline Checks Executed
 
-In accordance with Phase 1 instructions, Phase 0 files (`README.md`, `.gitignore`) were **not modified**. We recommend the following update for Phase 2:
-- **`README.md`**: Update project structure to reference the new comprehensive documentation suite located under `docs/` (`docs/PRODUCT_SPEC.md`, `docs/ARCHITECTURE.md`, etc.).
+All verification checks were executed against the Phase 1 documentation changes on the working tree. No application-code changes were present.
+
+- **Read-Only Baseline Inspection**: Evaluated package manifests and test scripts. Result: 0 packages installed, 0 failures.
+- **Git Status & Working Tree Integrity**: Verified `git status` and `git diff --stat`. Only documentation files in `docs/` are modified (intentionally uncommitted Phase 1 specifications); zero application files modified.
+- **Formatting & Whitespace Check**: Verified `git diff --check`. 0 whitespace or formatting errors.
+- **Secret Scan**: Grep scan across `docs/` confirmed zero credentials, access tokens, or private keys.
 
 ---
 
@@ -144,15 +154,15 @@ In accordance with Phase 1 instructions, Phase 0 files (`README.md`, `.gitignore
 | **Design System & Motion Principles** | `docs/DESIGN_SYSTEM.md` | Section 1 ("Ergonomic Baseline"), Section 3 ("Tokens"), Section 5 ("Motion") |
 | **Testing Pyramid & Critical E2E Flow**| `docs/TESTING_AND_DEPLOYMENT.md`| Section 1 ("Testing Strategy") & Section 2 ("Critical E2E Journey") |
 | **Deployment Candidates & Recovery** | `docs/TESTING_AND_DEPLOYMENT.md`| Section 6 ("Deployment Architecture") & Section 7 ("Operational Lifecycle") |
-| **Decision Records & Labels** | `docs/DECISIONS.md` | Section 2 ("Decision Records: DEC-001 through DEC-010") |
-| **Open Questions Q1 through Q8** | `docs/DECISIONS.md` | Section 3 ("Mandatory Open Questions Register") |
+| **Decision Records & Labels** | `docs/DECISIONS.md` | Section 2 ("Decision Records: DEC-001 through DEC-011") |
+| **Open Questions Register** | `docs/DECISIONS.md` | Section 3 ("Open Questions Register: Q1–Q4 DECIDED, Q1-A & Q5–Q8 OPEN") |
 
 ---
 
 ## 11. Phase 2 Prerequisites
 
-Before initiating Phase 2 (Foundation & Setup), the owner must:
-1. Review and approve the Phase 1 specifications and decision records in `docs/DECISIONS.md`.
-2. Provide answers or approve proposed defaults for Open Questions **Q1** (Signup policy) and **Q4** (Snapshot publishing model).
-3. Confirm if SHOULD-HAVE capabilities (Playful Micro-Interactions, Ambient Music, Response Notifications) are included in the Phase 2 data model.
+Before initiating Phase 2 (Foundation & Setup), the owner may:
+1. Review and confirm the updated Phase 1 specifications and decision records in `docs/DECISIONS.md`.
+2. Provide guidance on Open Question **Q1-A** (Razorpay commercialization, pricing, and billing model) or allow Phase 2 to scaffold the schema with flexible entitlement states.
+3. Confirm if SHOULD-HAVE capabilities (Playful Micro-Interactions, Ambient Music, Response Notifications) are included in early Phase 2 domain models.
 4. If instructed, commit the documentation files using: `docs(phase-1): complete product and architecture specification`.

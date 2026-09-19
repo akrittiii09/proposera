@@ -72,7 +72,7 @@
 4. **Metadata Sanitization (EXIF)**: Automatic stripping of EXIF data, GPS coordinates, camera serial numbers, and author tags before permanent storage.
 5. **Private vs. Public Bucket Partitioning**:
    - Draft media resides in a private bucket accessible only via short-lived authenticated URLs.
-   - Only media referenced in a `PUBLISHED` snapshot is served via public CDN endpoints.
+   - Only media referenced in a `PUBLISHED` proposal is served via public CDN endpoints.
 
 ---
 
@@ -126,8 +126,9 @@ The application strictly compartmentalizes secrets. No concrete credentials are 
 1. `DATABASE_CREDENTIALS`: Connection string and pool secrets for relational database.
 2. `AUTH_SECRETS`: Session encryption keys, JWT signing keys, salt factors.
 3. `STORAGE_CREDENTIALS`: Cloud object store access key, secret key, and endpoint.
-4. `PUBLIC_DOMAIN_CONFIG`: Canonical hostnames for application and media CDN.
-5. `ENCRYPTION_KEYS`: Application-level data encryption keys for at-rest payload protection.
+4. `PAYMENT_CREDENTIALS`: Razorpay API Key ID, Key Secret, and Webhook Signing Secret (`RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`) — integration deferred to Phase 2+.
+5. `PUBLIC_DOMAIN_CONFIG`: Canonical hostnames for application and media CDN.
+6. `ENCRYPTION_KEYS`: Application-level data encryption keys for at-rest payload protection.
 
 ---
 
@@ -142,3 +143,14 @@ The application strictly compartmentalizes secrets. No concrete credentials are 
 | **THREAT-05** | **Storage Exhaustion**: Creator uploads massive quantities of files to drive up hosting costs. | High | Strict per-creator storage byte quotas enforced before pre-signed upload URL generation. |
 | **THREAT-06** | **Search Engine Scraping**: Googlebot indexes proposals, making private relationship milestones public in search results. | High | Global `noindex, nofollow` headers and robots.txt disallow directives on all recipient and app routes. |
 | **THREAT-07** | **PII Exposure in Server Logs**: Romantic letters and recipient answers end up in third-party error monitoring platforms. | Medium | Middleware log sanitizer scrubs message bodies, partner names, and query parameters before writing logs. |
+
+---
+
+## 10. Security Controls Classification
+
+| Classification Tier | Security Controls & Measures | Enforcement Realm |
+| :--- | :--- | :--- |
+| **Required Controls (MVP)** | - Authoritative server-side validation on all API endpoints.<br>- Ownership authorization guard (`creator_id === session.user_id`).<br>- Generic 404 non-disclosure for drafts and unpublished proposals.<br>- Prohibition of raw HTML rendering (XSS protection).<br>- Magic-byte file validation, EXIF stripping, and WebP re-encoding.<br>- `noindex, nofollow, noarchive` headers on all `/p/*` and `/app/*` routes.<br>- Per-creator media storage byte quotas.<br>- Rate limiting on public response submissions.<br>- Unguessable secret URL with zero recipient auth (DEC-009 / Q3).<br>- Public creator signup gated by Razorpay paywall (DEC-008 / Q1). | Server / Edge |
+| **Proposed Controls (Phase 2)** | - Password hashing via Argon2id (cost factor $\ge 12$).<br>- HTTP-only, Secure, SameSite=Lax/Strict session cookies.<br>- Private Cloudflare R2 bucket isolation with ephemeral pre-signed upload URLs.<br>- Declarative Zod schema validation across all request boundaries.<br>- Content Security Policy (CSP) header enforcement.<br>- Razorpay webhook signature verification (`X-Razorpay-Signature`). | Server / Application |
+| **Future Controls (Deferred)** | - Progressive CAPTCHA triggers on high-velocity requests.<br>- WebAuthn / Passkey support for creator authentication.<br>- Automated virus/malware scanning worker for uploaded assets.<br>- Optional passcode protection for public proposal links (Deferred Phase 9+ per Q3). | Worker / Cloud Infra |
+| **Open Security Questions** | - **Q1-A**: Razorpay commercialization details (pricing, currency, billing cycles).<br>- **Q5**: Ambient audio strategy (local asset vs. streaming embed CSP implications). | Owner Decision |

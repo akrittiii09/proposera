@@ -38,7 +38,7 @@ proposera.app/
 | `/register` | Auth | No (Guest) | Unauthenticated users (Redirects if auth) | N/A | N/A | Form validation errors |
 | `/app/proposals` | Creator Studio | Yes | Authenticated Creator | Displays all proposals owned by creator | Displays active status and shareable link | Redirects to `/login` if unauthenticated |
 | `/app/proposals/new` | Creator Studio | Yes | Authenticated Creator | Initializes new draft and redirects to editor | N/A | Redirects to `/login` if unauthenticated |
-| `/app/proposals/[id]` | Creator Studio | Yes | Proposal Owner Only | Loads draft editor with autosave | Loads editor; changes queue for republish | 404 if not found or unauthorized |
+| `/app/proposals/[id]` | Creator Studio | Yes | Proposal Owner Only | Loads draft editor with autosave | Loads editor; saves update live published proposal immediately (DEC-007 / Q4) | 404 if not found or unauthorized |
 | `/app/proposals/[id]/preview` | Preview Sandbox | Yes | Proposal Owner Only | Renders shared scene renderer with draft data | Renders shared scene renderer with latest draft | 404 if unauthorized; never public |
 | `/app/proposals/[id]/settings`| Creator Studio | Yes | Proposal Owner Only | Manage internal title, delete draft | Manage slug, unpublish, view responses | 404 if unauthorized |
 | `/p/[slug]` | Recipient | No | Public (Anyone with valid slug) | **Returns 404** (Drafts are never accessible) | Renders published recipient scene flow | Generic 404 Not Found screen |
@@ -106,5 +106,5 @@ When an unauthenticated recipient visits `/p/[slug]`:
 
 - **Decoupled Architecture**: Routes are 100% agnostic of visual themes.
 - Themes do **not** register unique URL paths (e.g., no `/p/[slug]/celestial` or `/p/[slug]/minimal`).
-- The public route `/p/[slug]` inspects the proposal's published snapshot, identifies the active `theme_id`, and loads the corresponding theme renderer dynamically on the client.
+- The public route `/p/[slug]` inspects the live published proposal record, identifies the active `theme_id`, and loads the corresponding theme renderer dynamically on the client.
 - Adding 50 new themes in future phases requires zero routing modifications, zero route migrations, and zero URL rewrites.

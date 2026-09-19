@@ -24,14 +24,15 @@ Proposera is designed with strict separation of concerns, ensuring high performa
 │  │  Validation Layer (Schema validation, File magic-number scan)    │  │
 │  ├──────────────────────────────────────────────────────────────────┤  │
 │  │  Services: ProposalService | MediaService | PublishingService    │  │
+│  │            PaymentService (Razorpay Webhooks — Deferred)         │  │
 │  └────────────┬──────────────────────────────┬──────────────────────┘  │
 └───────────────┼──────────────────────────────┼─────────────────────────┘
                 ▼                              ▼
 ┌──────────────────────────────┐ ┌───────────────────────────────────────┐
 │       DATABASE LAYER         │ │         OBJECT STORAGE (BLOB)         │
 │  (Relational DB / Postgres)  │ │   (Private Bucket & Public CDN)       │
-│  - Creators & Proposals      │ │   - Media Assets                      │
-│  - Draft Content & Snapshots │ │   - Stripped EXIF, Optimized WebP     │
+│  - Creators & Entitlements   │ │   - Media Assets                      │
+│  - Proposals & Stories       │ │   - Stripped EXIF, Optimized WebP     │
 │  - Response Records          │ │                                       │
 └──────────────────────────────┘ └───────────────────────────────────────┘
 ```
@@ -43,9 +44,26 @@ Proposera is designed with strict separation of concerns, ensuring high performa
 | **Frontend (Studio)** | Creator workspace, authoring forms, live preview controls. | Client-side (Browser) | Untrusted; all form values subject to server validation. | Server handles auth; client performs cosmetic validation only. |
 | **Frontend (Recipient)**| Immersive, lightweight, responsive proposal narrative. | Client-side (Browser) | Untrusted; recipient has zero write rights except response token. | Served via unauthenticated read projection; no secrets exposed. |
 | **Backend API** | Business logic, state management, file ingestion, projection. | Server-side | Never trust: client MIME headers, user IDs, publication status flags. | Strict server-side validation and ownership verification. |
-| **Database** | Relational integrity, atomic commits, draft and snapshot storage. | Server-side / DB | Sanitized parameterized inputs only; no direct client SQL. | Enforced by ORM/data-access repository layers. |
+| **Payment Gateway (Razorpay)** | Checkout modal, payment verification, webhook ingestion. *(DECIDED Q1, Implementation DEFERRED)* | External / Server-side Webhook | Untrusted client checkout responses; verify signatures via Razorpay secret. | Entitlement granted only upon cryptographically verified webhook or server capture. |
+| **Database** | Relational integrity, atomic commits, draft and proposal storage. | Server-side / DB | Sanitized parameterized inputs only; no direct client SQL. | Enforced by ORM/data-access repository layers. |
 | **Object Storage** | Storing binary media assets (images, audio). | Cloud Storage | Never trust client file streams; scanned before final move. | Pre-signed upload credentials with strict byte and content limits. |
 | **Observability** | Error tracking, health telemetry, performance metrics. | Server & Edge | Strip all PII, partner names, romantic messages before logging. | Log sanitization filters enforced at transport middleware. |
+
+### 1.2 Client Responsibilities (Browser / Client-Side)
+- **Safe Operations**: Interactive UI rendering, scene transitions, animation orchestration, audio playback triggers, optimistic form feedback, responsive viewport adaptation.
+- **Untrusted Realm**: All client input (parameters, query strings, headers, form payloads) is treated as untrusted.
+- **Zero Authority**: The client never decides authorization, never enforces storage quotas, and never accesses raw draft records directly.
+
+### 1.3 Server Responsibilities (Backend API & Services)
+- **Authoritative Validation & Logic**: Parsing and verifying payload schemas (Zod), enforcing file magic numbers, validating image dimensions, stripping EXIF metadata, generating pre-signed upload URLs.
+- **Authorization Enforcement**: Strict session resolution and proposal ownership verification (`proposal.creator_id === session.user_id`).
+- **Data Projection**: Filtering raw internal proposal entities into sanitized, public-safe JSON projections for recipient consumption.
+- **Rate Limiting & Abuse Prevention**: Throttling public read/write surfaces and response submissions.
+
+### 1.4 Database Responsibilities (Data Tier)
+- **Relational Integrity**: Foreign key constraints, unique constraints on public slugs, cascade soft-deletes, non-null guarantees.
+- **Atomic Operations**: Live mutable publication state updates, status transitions, and response persistence executed within ACID transactions.
+- **Data Protection at Rest**: Encrypted storage, connection pooling, parameterized query execution to prevent SQL injection.
 
 ---
 
@@ -75,9 +93,9 @@ Every scene component adheres to a strict interface:
 To eliminate parity discrepancies and prevent maintaining two disparate codebases:
 - The **exact same** Scene Orchestrator and Scene Components are used in both the Recipient Experience and the Creator Preview.
 - **The Only Differences**:
-  1. *Data Source*: Recipient loads frozen `PublicationSnapshot` from public endpoint; Preview loads live working draft from authenticated creator API.
+  1. *Data Source*: Recipient loads published proposal content projection from the public endpoint (`/p/[slug]`); Preview loads live working draft from authenticated creator API. Published proposals are live and mutable (DEC-007 / Q4); edits immediately reflect upon save.
   2. *Chrome Wrapper*: Recipient view renders with zero UI chrome (viewport full-screen); Preview renders inside a simulated mobile viewport frame with preview status banner.
-  3. *Interaction Handling*: Recipient response writes to the database; Preview response triggers celebration locally without persisting mock responses.
+  3. *Interaction Handling*: Recipient response writes to the database (persisted and viewable in Creator Studio per Q2); Preview response triggers celebration locally without persisting mock responses.
 
 ---
 

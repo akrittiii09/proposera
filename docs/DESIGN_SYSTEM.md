@@ -17,6 +17,15 @@ The Proposera design system establishes the visual language, interaction pattern
 | **Reduced Motion Preference** | Strict adherence to `prefers-reduced-motion: reduce`. Disables continuous parallax, screen shakes, and particle physics in favor of elegant alpha crossfades. | `DESIGN-SYSTEM` |
 | **No Manipulative UI Mechanics**| Zero dark patterns, no fleeing buttons, no deceitful interaction triggers. | `FEATURE-LEVEL` |
 
+### 1.2 Domain-Scoped Requirements Breakdown
+
+| Requirement Scope | Applicable Requirements & Ergonomic Constraints |
+| :--- | :--- |
+| **Platform-Wide Requirements** | - WCAG 2.1 AA contrast compliance (4.5:1 text, 3:1 display).<br>- Semantic HTML5 structure and valid ARIA landmark hierarchies.<br>- Full keyboard accessibility with clear focus rings.<br>- Strict `prefers-reduced-motion: reduce` compliance across all animation wrappers. |
+| **Creator-Specific Requirements** | - Desktop & tablet productivity ergonomics (wide-form layout, dual-pane editor).<br>- Clear error states with `aria-describedby` associations.<br>- Accessible modal confirmation dialogs with keyboard focus traps.<br>- Real-time autosave indicators without jarring layout shifts. |
+| **Recipient-Specific Requirements** | - Mobile-first vertical phone optimization (360px–430px primary viewport).<br>- Minimum 48x48px touch targets for all scene progression and interactive buttons.<br>- Distraction-free presentation (zero dashboard chrome, headers, or footers).<br>- Gentle, paced scene transitions with thumb-friendly navigation. |
+| **Feature-Specific Requirements** | - **Proposal Reveal Scene**: High-contrast, dignified proposal question presentation.<br>- **Affirmative Interaction**: Unambiguous, accessible affirmative choice; zero fleeing or manipulative tricks.<br>- **Celebration Engine**: Dynamic confetti fireworks (gracefully degraded to static celebratory typography when reduced motion is preferred).<br>- **Audio Toggle**: Accessible persistent mute/play button with explicit screen-reader label. |
+
 ---
 
 ## 2. Environmental Baselines & Performance Budgets (PROPOSED)

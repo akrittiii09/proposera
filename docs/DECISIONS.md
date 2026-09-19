@@ -47,7 +47,7 @@
 - **Source**: Phase 1 Prompt, Section 3 ("Preview and published rendering should share one rendering layer").
 - **Reason**: Prevents parity bugs where what the creator previews does not match what the recipient experiences.
 - **Alternatives Considered**: Separate preview component and recipient renderer. (Rejected: Inevitable visual drift and double maintenance).
-- **Tradeoffs**: Renderer must be cleanly abstracted to accept both draft data and published snapshot data.
+- **Tradeoffs**: Renderer must be cleanly abstracted to accept both draft data and published live data.
 - **Consequences**: 100% visual and behavioral parity guaranteed between preview and live delivery.
 - **Reversibility**: COSTLY.
 
@@ -89,14 +89,26 @@
 
 ---
 
-### DEC-007: Immutable Publication Snapshot Model
-- **Decision**: Publishing creates an immutable `PublicationSnapshot` record. Public routes serve this snapshot, allowing creators to make draft changes without exposing in-flight edits.
-- **Status**: **PROPOSED**
-- **Source**: Architectural evaluation of Open Question Q4.
-- **Reason**: Protects real-world delivery. If a creator makes edits after publishing, the partner viewing the link will not see broken sentences or half-uploaded images.
-- **Alternatives Considered**: Direct live editing on the single proposal row.
-- **Tradeoffs**: Requires managing draft content vs. active published snapshot pointers.
-- **Consequences**: Flawless live stability; allows uncommitted draft authoring.
+### DEC-007: Live Mutable Published Proposal Model
+- **Decision**: Published proposals are live and mutable. If the creator edits the proposal after publishing, the published experience updates immediately without requiring separate publication snapshots.
+- **Status**: **DECIDED**
+- **Source**: Owner Decision Q4 (Phase 1 Owner Decision Update).
+- **Reason**: Simplifies publishing flow and gives creators immediate control over live updates.
+- **Alternatives Considered**: Immutable publication snapshot model (previously proposed; rejected by owner).
+- **Tradeoffs**: Edits made after publishing are immediately visible to anyone visiting the live URL. (Version history / snapshot rollback deferred to future phases as a PROPOSED feature).
+- **Consequences**: Streamlined data model: proposal content is stored and edited directly, with live public projections reflecting the latest state when status is PUBLISHED.
+- **Reversibility**: REVERSIBLE.
+
+---
+
+### DEC-011: Public Creator Signup with Razorpay Paywall
+- **Decision**: Proposera permits public creator registration. Access to relevant paid proposal authoring/publishing functionality is gated by a Razorpay-based payment and entitlement system.
+- **Status**: **DECIDED**
+- **Source**: Owner Decision Q1 (Phase 1 Owner Decision Update).
+- **Reason**: Enables direct commercialization and self-serve onboarding. Razorpay is the owner's selected payment provider.
+- **Alternatives Considered**: Invite-only cohorts, owner-only admin account, Stripe. (Rejected by owner).
+- **Tradeoffs**: Requires payment gateway integration, webhook handlers, and entitlement state management.
+- **Consequences**: Clear separation between public account registration and paid feature entitlements. Razorpay integration is deferred to Phase 2+.
 - **Reversibility**: COSTLY.
 
 ---
@@ -140,52 +152,35 @@
 
 ---
 
-## 3. Mandatory Open Questions Register
+## 3. Owner Decision Register & Open Questions
 
-### Q1: Who may sign up as a creator: owner only, invited users, or the public?
-- **Why It Matters**: Dictates authentication architecture, registration routes, abuse surface, and infrastructure capacity planning.
-- **Options**:
-  - *Option A*: Single-owner / private admin account only.
-  - *Option B*: Invite-only / allowlist registration.
-  - *Option C*: Open public registration.
-- **Tradeoffs**: Open public registration requires heavy bot defense, CAPTCHA, email verification, and abuse monitoring. Single-owner keeps operational burden near zero.
-- **PROPOSED Default**: **Option B (Invite-only / closed initial cohort)** for Phase 2, transitioning to Option C once platform limits and abuse pipelines are battle-tested.
-- **Blocking Phase**: Blocks Phase 2 (Authentication & User Model).
+### 3.1 Owner Decision Register (Resolved)
 
----
+#### Q1 — Creator Signup
+- **Status**: **DECIDED**
+- **Decision**: Public creator signup with Razorpay paywall. Proposera will allow creators to publicly sign up. Access to relevant paid functionality is controlled by a Razorpay-based payment/entitlement system. Razorpay is the chosen payment provider. Implementation is DEFERRED to Phase 2+.
 
-### Q2: Is the recipient's response persisted? Does the creator see it or get notified?
-- **Why It Matters**: Dictates whether the response is purely a client-side celebratory UI moment or an asynchronous backend workflow with push/email notifications.
-- **Options**:
-  - *Option A*: Persisted to database; creator views response timestamp and note in Studio dashboard; optional email notification sent to creator.
-  - *Option B*: Pure client-side celebration; no data persisted.
-  - *Option C*: Real-time WebSocket event signaling the creator's phone.
-- **Tradeoffs**: Option A provides enduring sentimental records without WebSocket infrastructure overhead. Option B lacks confirmation if creator is not physically watching.
-- **PROPOSED Default**: **Option A (Persisted to database with Studio dashboard indicator)**.
-- **Blocking Phase**: Blocks Phase 3 (Response Pipeline & Notifications).
+#### Q2 — Response Persistence
+- **Status**: **DECIDED**
+- **Decision**: Recipient responses are persisted and visible to the creator. When the recipient responds, the choice and timestamp are persisted in the database, and the creator can view the response in the creator studio. Database/API implementation is DEFERRED to Phase 3.
+
+#### Q3 — Public Link Protection
+- **Status**: **DECIDED**
+- **Decision**: Secret/random proposal URL; creator authentication required; recipient authentication not required. The recipient does NOT need to authenticate or log in. The creator DOES authenticate. Access is mediated by possession of an unguessable secret URL (`/p/[slug]`).
+
+#### Q4 — Edit After Publish
+- **Status**: **DECIDED**
+- **Decision**: Published proposals are live mutable experiences and update immediately when edited. If the creator edits the proposal after publishing, the published experience changes accordingly. Immutable publication snapshots are not part of the active architecture.
 
 ---
 
-### Q3: Public link model: vanity vs. unguessable slug; extra access protection; search-indexing policy.
-- **Why It Matters**: Determines slug generation logic, collision resolution, and privacy guarantees for published links.
-- **Options**:
-  - *Option A*: Cryptographically unguessable slugs by default (e.g. `/p/for-sophia-k9x2`), with optional custom vanity override, strict `noindex`, and optional passcode protection.
-  - *Option B*: Pure vanity slugs only (`/p/sophia`).
-  - *Option C*: Password/PIN required on all public links.
-- **Tradeoffs**: Passcodes add friction to a romantic moment. Unguessable slugs balance effortless opening with confidentiality.
-- **PROPOSED Default**: **Option A (Unguessable by default, optional vanity override, global `noindex` header, optional PIN deferred)**.
-- **Blocking Phase**: Blocks Phase 4 (Public Routing & Publication Engine).
+### 3.2 Remaining Open Questions Register (Awaiting Owner Decision)
 
----
-
-### Q4: Edit-after-publish: live edits vs. republish/snapshot.
-- **Why It Matters**: Governs content storage architecture, caching, and whether in-flight edits can corrupt a live proposal view.
-- **Options**:
-  - *Option A*: Direct live edits (single mutable content row).
-  - *Option B*: Immutable publication snapshot; drafts are edited independently and require clicking "Publish Updates".
-- **Tradeoffs**: Option A is simpler to code but dangerous if the partner opens the proposal while the creator is revising text. Option B provides absolute delivery safety.
-- **PROPOSED Default**: **Option B (Snapshot-based publishing)**.
-- **Blocking Phase**: Blocks Phase 2 (Data Model & Schema Implementation).
+#### Q1-A: Razorpay Commercialization Specifics
+- **Why It Matters**: Dictates checkout session creation, webhook payload parsing, and entitlement expiration logic.
+- **Unresolved Elements**: Exact pricing, one-time payment vs. subscription, trial period, refund policy, currency support, and tax calculation.
+- **Status**: **OPEN QUESTION**
+- **Blocking Phase**: Blocks Phase 2+ (Payment & Entitlement Implementation).
 
 ---
 
@@ -241,11 +236,13 @@ The following items are recognized as out-of-scope for Phase 1 and are intention
 
 | Deferred Capability | Target Phase | Dependency / Reason |
 | :--- | :--- | :--- |
-| **Creator Authentication Implementation** | Phase 2 | Depends on Q1 resolution. |
-| **Database Migrations & ORM Setup** | Phase 2 | Depends on Q4 and DEC-007 approval. |
+| **Creator Authentication Implementation** | Phase 2 | Scheduled for implementation following Q1 public signup decision. |
+| **Razorpay Payment & Entitlement Integration** | Phase 2+ | Depends on Q1-A pricing and entitlement model resolution. |
+| **Database Migrations & ORM Setup** | Phase 2 | Scheduled for implementation following live mutable data model approval. |
 | **Media Upload Ingestion Worker** | Phase 6 | Requires object store provisioning and API scaffolding. |
 | **Curated Audio Engine & Autoplay Handler**| Phase 7 | Depends on Q5 resolution. |
 | **Playful Micro-Interactions (Scratch/Flip)**| Phase 8 | Non-blocking enhancement to core narrative flow. |
+| **Proposal Version History & Rollback** | Phase 9 | Future enhancement; published proposals remain live mutable in MVP. |
 | **Collaborative Proposal Co-Authoring** | Phase 12 | Requires multi-tenant permissions and conflict resolution. |
 | **Custom Domain Mapping (CNAME)** | Phase 13 | Requires automated SSL certificate provisioning. |
 | **Video Ingestion & Transcoding** | Phase 14 | Requires dedicated video processing pipeline and CDN budget. |

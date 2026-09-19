@@ -29,11 +29,11 @@ The primary end-to-end test journey validates the fundamental value proposition 
 2. **Step 2: Content Population**: Creator populates partner name, romantic letters, and adds two milestones with mock media assets.
 3. **Step 3: Theme Customization**: Creator selects a theme (e.g., "celestial-rose"); verifies UI immediately updates preview without altering saved text.
 4. **Step 4: Authenticated Preview Verification**: Creator opens `/app/proposals/[id]/preview`; verifies that the shared scene renderer displays all content with complete fidelity.
-5. **Step 5: Publish Execution**: Creator publishes proposal; system locks an immutable `PublicationSnapshot` and issues slug `/p/sophia-love-x89`.
+5. **Step 5: Publish Execution**: Creator publishes proposal; system transitions proposal to live `PUBLISHED` status and issues secret slug `/p/sophia-love-x89` (under DEC-007 / Q4, published proposals are live and mutable; no immutable snapshots).
 6. **Step 6: Public Recipient Delivery**: Unauthenticated browser navigates to `/p/sophia-love-x89`; verifies zero creator chrome, correct scenes, and valid public media URLs.
 7. **Step 7: Climax & Affirmative Response**: Recipient advances through timeline, triggers proposal reveal, and taps the affirmative "Yes" button.
-8. **Step 8: Celebration Verification**: Celebration scene activates (confetti triggers, celebratory music/text renders). Response payload is sent to backend.
-9. **Step 9: Post-Publish Verification**: Creator dashboard displays the affirmative response timestamp; creator unpublishes; subsequent public request to `/p/sophia-love-x89` immediately returns 404.
+8. **Step 8: Celebration Verification**: Celebration scene activates (confetti triggers, celebratory music/text renders). Response payload is sent to backend and persisted (DEC-002 / Q2).
+9. **Step 9: Post-Publish Verification**: Creator dashboard displays the affirmative response timestamp and message in Creator Studio; creator edits narrative text and confirms live update reflects immediately on `/p/sophia-love-x89`; creator unpublishes; subsequent public request immediately returns generic 404.
 
 *Pass Condition*: Steps 1 through 9 execute with zero runtime errors, zero DOM leaks of private creator data, and 100% assertion success on state transitions.
 

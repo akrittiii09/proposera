@@ -16,15 +16,15 @@ Proposera serves two fundamentally distinct experiences:
 
 ### 2.1 Creator (Author / Account Owner)
 - **Definition**: The individual planning and delivering the proposal.
-- **Intent**: Craft a highly tailored digital journey celebrating a shared relationship, preview it with fidelity, publish it to a shareable URL, present or send it to their partner, and manage its state (unpublish, update slug, or edit).
-- **Authentication**: Authenticated user (session/token-based).
-- **Privilege Level**: Full write and read access exclusively to their own created proposals, media, and configurations. Zero access to other creators' proposals.
+- **Intent**: Craft a highly tailored digital journey celebrating a shared relationship, preview it with fidelity, publish it to a shareable secret URL, present or send it to their partner, manage its state (unpublish, update slug, or edit), and review the recipient's response.
+- **Authentication & Signup**: **DECIDED**. Public creator signup is supported. Creators authenticate via secure session/token credentials. Access to proposal authoring and publishing functionality is gated by a **Razorpay-based payment/entitlement system** (payment implementation DEFERRED to Phase 2+).
+- **Privilege Level**: Full write and read access exclusively to their own created proposals, media, responses, and configurations. Zero access to other creators' proposals.
 
 ### 2.2 Recipient (Partner)
 - **Definition**: The partner experiencing the proposal.
-- **Intent**: Experience a romantic, emotionally coherent narrative culminating in a meaningful question and celebration.
-- **Authentication**: Unauthenticated by default (accesses via a unique shareable public slug or link token).
-- **Privilege Level**: Read-only access to published, public proposal projection data. Interaction privilege is strictly limited to submitting an emotional response. No access to creator drafts, dashboard routes, raw media buckets, or management controls.
+- **Intent**: Experience a romantic, emotionally coherent narrative culminating in a meaningful question and celebration, and submit a heartfelt response.
+- **Authentication & Access Mechanism**: **DECIDED**. The recipient does **NOT** authenticate. There is no recipient login, no recipient accounts, and no passwords. Access is granted purely by possession of a **secret/random URL** (`/p/[slug]`).
+- **Privilege Level**: Read-only access to published, public proposal projection data. Interaction privilege is strictly limited to submitting an emotional response that is persisted for the creator. No access to creator drafts, studio controls, raw media buckets, or administrative routes.
 
 ### 2.3 Other Roles Evaluation
 - **Platform Administrator**: Evaluated but **DEFERRED** to Phase 12 (Governance & Ops). No admin dashboard or system operator role is introduced in MVP to prevent premature complexity. System configuration remains infrastructure- and environment-driven.
@@ -35,26 +35,36 @@ Proposera serves two fundamentally distinct experiences:
 ## 3. User Journeys
 
 ### 3.1 Creator Journey
-1. **Account Access**: Creator lands on the Proposera platform and signs in or registers.
-2. **Proposal Initialization**: Initiates a new proposal; system provisions a draft record with default structural scenes.
-3. **Partner & Narrative Setup**: Enters partner details (names, nicknames, key dates, relationship milestones).
-4. **Media Assembly**: Selects and uploads personal photos/media through an authenticated upload pipeline; system validates, sanitizes, and previews media.
-5. **Message & Story Curation**: Writes romantic notes, memory narratives, and configures timeline scenes.
-6. **Theme Selection**: Chooses a visual theme from available design templates; theme changes immediately reflect across rendering without altering content data.
-7. **Interactive Elements Configuration**: Configures interactive moments, proposal reveal styling, and celebration effects (e.g., confetti dynamics).
-8. **Fidelity Preview**: Enters preview mode, simulating the exact mobile recipient experience using live draft data within an isolated preview sandbox.
-9. **Publication**: Commits to publish; system validates completeness, issues or confirms a shareable slug, and activates public availability.
-10. **Delivery & Sharing**: Copies the verified shareable link to present in person (via mobile/tablet) or transmit directly.
-11. **Post-Publish Lifecycle**: Creator can return to edit narrative, temporarily unpublish (revoking public access), or regenerate the access slug if link privacy is compromised.
+```text
+Signup → Authentication → Payment / Entitlement → Create Proposal → Configure → Save Draft → Preview → Publish → Secret Proposal URL (and Live Edits)
+```
+1. **Public Signup & Authentication**: Creator registers publicly on the Proposera platform and signs in.
+2. **Payment / Entitlement Gate**: Creator completes payment via Razorpay to unlock creation/publishing entitlements (commercial terms and checkout logic DEFERRED to Phase 2+).
+3. **Proposal Initialization**: Initiates a new proposal; system provisions a draft record with default structural scenes.
+4. **Partner & Narrative Setup**: Enters partner details (names, nicknames, key dates, relationship milestones).
+5. **Media Assembly**: Selects and uploads personal photos/media through an authenticated upload pipeline; system validates, sanitizes, and previews media.
+6. **Message & Story Curation**: Writes romantic notes, memory narratives, and configures timeline scenes.
+7. **Theme Selection**: Chooses a visual theme from available design templates; theme changes immediately reflect across rendering without altering content data.
+8. **Interactive Elements Configuration**: Configures interactive moments, proposal reveal styling, and celebration effects (e.g., confetti dynamics).
+9. **Fidelity Preview**: Enters preview mode, simulating the exact mobile recipient experience using live draft data within an isolated preview sandbox.
+10. **Publication**: Commits to publish; system validates completeness, issues an unguessable secret URL (`/p/[slug]`), and marks the proposal live.
+11. **Delivery & Sharing**: Copies the verified secret link to present in person (via mobile/tablet) or transmit directly.
+12. **Live Post-Publish Updates**: Creator can return to edit the narrative at any time; changes immediately update the live published proposal.
+13. **Response Review**: Creator views the partner's persisted response and timestamp in the Creator Studio.
+14. **Emergency Controls**: Creator can temporarily unpublish (revoking public access) or regenerate the secret slug if link privacy is compromised.
 
 ### 3.2 Recipient Journey
-1. **Access / Open**: Recipient opens the shared URL on their device (overwhelmingly mobile).
+```text
+Secret Proposal URL → No Login Required → Proposal Experience → Reach Proposal Moment → Respond → Celebration / Completion
+```
+1. **Access via Secret URL**: Recipient opens the shared secret/random URL on their device (overwhelmingly mobile). Zero login or account creation required.
 2. **Introduction / Hook**: Lands on a calm, elegant opening scene setting an intimate emotional tone without dashboard chrome, headers, footers, or navigational clutter.
 3. **Personalized Story & Memories**: Advances through a sequential, scene-based narrative displaying shared milestones, romantic letters, photos, and memory vignettes at a comfortable, natural cadence.
 4. **Interactive Moments**: Engages with gentle, optional interactive prompts (e.g., revealing a hidden note or memory checkpoint) that maintain focus and anticipation.
 5. **The Proposal Reveal**: Reaches the focal climax of the experience—the marriage/partnership proposal question, styled with deliberate typographic and ambient focus.
 6. **Response Selection**: Recipient encounters clear, respectful response options that honor genuine agency without manipulative UI traps, dark patterns, or inaccessible gimmicks.
-7. **Celebration**: Upon selecting an affirmative response, a rich, joyous celebration experience unfolds (ambient confetti, celebratory music/visuals, closing heartfelt affirmation).
+7. **Response Persistence**: Upon selecting an answer, the response is persisted to the database so the creator can view it.
+8. **Celebration**: A rich, joyous celebration experience unfolds (ambient confetti, celebratory music/visuals, closing heartfelt affirmation).
 
 ---
 
@@ -90,22 +100,20 @@ Proposera serves two fundamentally distinct experiences:
 | *(None)* | Create Proposal | **DRAFT** | Inaccessible (404) | Authenticated creator |
 | **DRAFT** | Save / Autosave | **DRAFT** | Inaccessible (404) | Owner creator only |
 | **DRAFT** | Open Preview | **DRAFT** | Inaccessible (Recipient cannot access; Creator sees preview in auth session) | Owner creator only |
-| **DRAFT** | Publish | **PUBLISHED** | Active Recipient Experience | Owner creator only |
-| **PUBLISHED** | Edit Content *(Option A: Live)* | **PUBLISHED** | Immediate reflection of edits | Owner creator only |
-| **PUBLISHED** | Edit Content *(Option B: Snapshot)* | **PUBLISHED** (Live stays unchanged until republish; working copy is Draft) | Serves previous snapshot until republished | Owner creator only |
-| **PUBLISHED** | Unpublish | **UNPUBLISHED** | Inaccessible (Generic Not Found / Unavailable) | Owner creator only |
+| **DRAFT** | Publish | **PUBLISHED** | Active Recipient Experience (Secret URL live) | Owner creator only |
+| **PUBLISHED** | Edit Content | **PUBLISHED** | Immediate reflection of live edits | Owner creator only |
+| **PUBLISHED** | Unpublish | **UNPUBLISHED** | Inaccessible (Generic 404 Not Found) | Owner creator only |
 | **UNPUBLISHED**| Re-publish | **PUBLISHED** | Active Recipient Experience | Owner creator only |
-| **PUBLISHED** | Regenerate Slug | **PUBLISHED** (New Slug) | Old slug yields 404; New slug yields Active Experience | Owner creator only |
+| **PUBLISHED** | Regenerate Slug | **PUBLISHED** (New Slug) | Old slug yields 404; New secret slug yields Active Experience | Owner creator only |
 | **ANY** | Delete | **DELETED** (Soft) | Inaccessible (404) | Owner creator only |
 
-### 4.3 Edit-After-Publish Tradeoff Evaluation *(Open Question Q4)*
-- **Model 1: Direct Live Editing**:
-  - *Mechanism*: Edits saved by the creator immediately update the public record.
-  - *Tradeoffs*: Simple data model; zero branching. However, if the recipient opens the link while the creator is making half-finished edits, the recipient sees broken formatting or partial thoughts.
-- **Model 2: Publication Snapshot (Working Draft vs. Published Snapshot)**:
-  - *Mechanism*: Publishing creates an immutable published snapshot or version pointer. The creator continues editing a working draft. Changes only go live when the creator explicitly clicks "Update / Re-publish".
-  - *Tradeoffs*: Flawless recipient isolation and safety during in-flight authoring. Requires versioned content records or draft-vs-live payload storage.
-  - *Proposed Recommendation*: **Model 2 (Snapshot-based Publishing)**. It guarantees the partner never catches the creator mid-edit during high-stakes real-world delivery.
+### 4.3 Edit-After-Publish Architecture (DECIDED — Q4)
+- **Selected Direction**: **Live Mutable Published Proposal Model**.
+- **Behavior**: A published proposal is live and mutable. If the creator edits the proposal after publishing, the published experience updates accordingly:
+  ```text
+  Draft → Publish → Live Proposal → Creator Edits → Published Proposal Updates
+  ```
+- **Tradeoff & Future Scope**: Edits made after publishing are immediately visible to anyone with the secret link. Immutable publication snapshots are not part of the active MVP architecture. Staged draft branches, proposal version history, and snapshot rollbacks are **DEFERRED to Phase 9+ as PROPOSED future enhancements**.
 
 ---
 
@@ -113,45 +121,49 @@ Proposera serves two fundamentally distinct experiences:
 
 | Boundary Dimension | Creator Experience | Preview Experience | Recipient Experience |
 | :--- | :--- | :--- | :--- |
-| **Routes** | `/app/proposals/*`, `/app/settings/*` | `/app/proposals/[id]/preview` | `/p/[slug]` |
-| **Authentication** | Required (Strict Creator Session) | Required (Strict Creator Session) | Unauthenticated (Public access by slug token) |
-| **Data Readable** | Full proposal entity: raw content, draft status, media URLs, analytics, account info | Working draft content, active theme, uncommitted state | **Public Projection Allowlist Only**: filtered recipient content, sanitized media URLs, active theme styling |
-| **Data Writable** | Full CRUD on creator's own proposals, uploads, and account metadata | Ephemeral preview controls (e.g., test step advance); no persistent write | Emotional response submission only (if enabled) |
+| **Routes** | `/app/proposals/*`, `/app/settings/*` | `/app/proposals/[id]/preview` | `/p/[slug]` (Secret/Random URL) |
+| **Authentication** | Required (Public signup + Session token) | Required (Strict Creator Session) | **Zero Authentication** (No login, no accounts, no passwords) |
+| **Data Readable** | Full proposal entity: content, status, media, responses, entitlement | Working draft content, active theme, uncommitted state | **Public Projection Allowlist Only**: sanitized recipient content, media URLs, active theme styling |
+| **Data Writable** | Full CRUD on creator's own proposals, uploads, and account metadata | Ephemeral preview controls; no persistent write | Emotional response submission only (**Persisted to Database**, DECIDED Q2) |
 | **Code Shipped to Client** | Studio UI: Editors, form pickers, media uploaders, layout controls, management toolbars | Shared Scene Renderer + lightweight preview inspector chrome | **Shared Scene Renderer ONLY**; zero studio/editor code, zero authoring bundles |
-| **Caching Strategy** | `Cache-Control: private, no-store` | `Cache-Control: private, no-store` | Edge/CDN cacheable with stale-while-revalidate, keyed to published snapshot hash |
-| **Error Behavior** | Detailed actionable validation messages, form-field inline errors | Visual preview warning banners for incomplete scenes | Clean, minimal, emotionally neutral fallback screen ("Experience unavailable") |
+| **Caching Strategy** | `Cache-Control: private, no-store` | `Cache-Control: private, no-store` | Edge/CDN cacheable with stale-while-revalidate; revalidated immediately on creator edits |
+| **Error Behavior** | Detailed actionable validation messages, form-field inline errors | Visual preview warning banners for incomplete scenes | Clean, minimal, emotionally neutral fallback screen ("This page is unavailable or does not exist") |
 | **Failure Impact** | Creator is prevented from saving/publishing; guided to correct errors | Preview flags missing media or broken content blocks | System degrades gracefully (e.g., smooth fallback font, missing image placeholder without crashing) |
 
 ---
 
 ## 6. Scope Tiers
 
-Every capability from the owner vision is categorized below. No capability has been dropped.
+Every capability from the owner vision and decisions is categorized below.
 
-| Capability | Scope Tier | Justification & Architectural Rationale |
-| :--- | :--- | :--- |
-| **Personalized Names & Nicknames** | **MUST HAVE** | Core identity element of the romantic narrative. |
-| **Romantic Messages & Letters** | **MUST HAVE** | Primary emotional medium of the proposal. |
-| **Photo Upload & Display** | **MUST HAVE** | Core visual storytelling medium across relationship milestones. |
-| **Relationship Timeline & Memories** | **MUST HAVE** | Chronological progression anchoring the journey. |
-| **Theme Selection & Custom Colors** | **MUST HAVE** | Enables stylistic resonance while enforcing content separation. |
-| **Proposal Question Reveal** | **MUST HAVE** | The foundational climax of the product. |
-| **Accessible Affirmative ("Yes") Interaction** | **MUST HAVE** | The resolution moment for the recipient. |
-| **Confetti & Celebration Orchestration**| **MUST HAVE** | Joyful emotional culmination of the accepted proposal. |
-| **Custom URL / Shareable Link** | **MUST HAVE** | Essential mechanism for delivering the experience to the partner. |
-| **Mobile-First Responsive Recipient View**| **MUST HAVE** | Proposals are experienced on smartphones in intimate settings. |
-| **Fidelity Preview Mode** | **MUST HAVE** | Creator must verify pacing and rendering before live sharing. |
-| **Unpublish & Slug Regeneration** | **MUST HAVE** | Essential privacy and emergency control for creators. |
-| **Reduced-Motion Accessibility** | **MUST HAVE** | Non-negotiable requirement for recipient safety and accessibility. |
-| **Optional Playful Interactions** | **SHOULD HAVE** | Interactive micro-moments (e.g., scratch-to-reveal or memory flip cards) enrich the journey but must not block basic proposal delivery if simplified. |
-| **Ambient Background Music** | **SHOULD HAVE** | Elevates emotional mood, but constrained by mobile autoplay policies, licensing, and audio decoding. Proposed for initial implementation once audio policy is decided (Q5). |
-| **Response Notification / Persisted Answer**| **SHOULD HAVE** | Notification to creator when partner accepts; dependent on Open Question Q2 resolution. |
-| **Collaborative Co-Authoring** | **FUTURE/DEFERRED**| Single-creator focus in MVP; collaboration deferred to Phase 12. |
-| **Custom Domain Mapping (CNAME)** | **FUTURE/DEFERRED**| Advanced distribution feature; `/p/[slug]` satisfies MVP requirements. |
-| **Video Uploads & Streaming** | **FUTURE/DEFERRED**| Bandwidth, transcoding, and hosting storage costs exceed Phase 1 MVP constraints. |
+| Capability | Scope Tier | Origin & Authority Category | Justification & Architectural Rationale |
+| :--- | :--- | :--- | :--- |
+| **Public Creator Signup & Auth** | **MUST HAVE** | Owner Decision (DECIDED - Q1) | Creators register publicly and authenticate to manage proposals. |
+| **Razorpay Payment & Entitlement** | **MUST HAVE** | Owner Decision (DECIDED - Q1) | Paywall gates proposal creation/publishing (Implementation DEFERRED to Phase 2+). |
+| **Personalized Names & Nicknames** | **MUST HAVE** | Owner-Stated Requirement | Core identity element of the romantic narrative. |
+| **Romantic Messages & Letters** | **MUST HAVE** | Owner-Stated Requirement | Primary emotional medium of the proposal. |
+| **Photo Upload & Display** | **MUST HAVE** | Owner-Stated Requirement | Core visual storytelling medium across relationship milestones. |
+| **Relationship Timeline & Memories** | **MUST HAVE** | Owner-Stated Requirement | Chronological progression anchoring the journey. |
+| **Theme Selection & Custom Colors** | **MUST HAVE** | Owner-Stated Requirement | Enables stylistic resonance while enforcing content separation. |
+| **Proposal Question Reveal** | **MUST HAVE** | Owner-Stated Requirement | The foundational climax of the product. |
+| **Accessible Affirmative ("Yes") Interaction** | **MUST HAVE** | Owner-Stated Requirement | The resolution moment for the recipient. |
+| **Persisted Recipient Response & Review** | **MUST HAVE** | Owner Decision (DECIDED - Q2) | Recipient response is persisted and visible to the creator in Studio. |
+| **Secret / Random Proposal URL Access** | **MUST HAVE** | Owner Decision (DECIDED - Q3) | Recipient accesses via secret link without login. |
+| **Live Mutable Published Updates** | **MUST HAVE** | Owner Decision (DECIDED - Q4) | Published proposals update immediately when edited. |
+| **Confetti & Celebration Orchestration**| **MUST HAVE** | Owner-Stated Requirement | Joyful emotional culmination of the accepted proposal. |
+| **Mobile-First Responsive Recipient View**| **MUST HAVE** | Architectural Necessity | Proposals are experienced on smartphones in intimate settings. |
+| **Fidelity Preview Mode** | **MUST HAVE** | Architectural Necessity | Creator must verify pacing and rendering before live sharing. |
+| **Unpublish & Slug Regeneration** | **MUST HAVE** | Architectural Necessity | Essential privacy and emergency control for creators. |
+| **Reduced-Motion Accessibility** | **MUST HAVE** | Architectural Necessity | Non-negotiable requirement for recipient safety and accessibility. |
+| **Optional Playful Interactions** | **SHOULD HAVE** | Owner Vision (Proposed for MVP) | Interactive micro-moments (e.g., scratch-to-reveal or flip cards) enrich the journey. |
+| **Ambient Background Music** | **SHOULD HAVE** | Owner Vision (Proposed for MVP) | Elevates emotional mood; audio source policy pending Q5 decision. |
+| **Proposal Version History & Rollback** | **FUTURE/DEFERRED**| Deferred Scope (Phase 9+) | Post-publish edits are live mutable in MVP; version history deferred. |
+| **Collaborative Co-Authoring** | **FUTURE/DEFERRED**| Deferred Scope (Phase 12) | Single-creator focus in MVP; collaboration deferred. |
+| **Custom Domain Mapping (CNAME)** | **FUTURE/DEFERRED**| Deferred Scope (Phase 13) | Advanced distribution feature; `/p/[slug]` satisfies MVP requirements. |
+| **Video Uploads & Streaming** | **FUTURE/DEFERRED**| Deferred Scope (Phase 14) | Bandwidth, transcoding, and hosting storage costs exceed Phase 1 MVP constraints. |
 
 > [!IMPORTANT]
-> Capabilities placed in **SHOULD HAVE** (Playful Interactions, Ambient Music, Response Notification) are flagged for Owner Confirmation. They remain fully architected in this specification, ready for Phase 2 implementation if confirmed.
+> Capabilities placed in **SHOULD HAVE** (Playful Interactions, Ambient Music) remain flagged for Owner Confirmation. Razorpay commercial terms remain an **OPEN QUESTION (Q1-A)**.
 
 ---
 
