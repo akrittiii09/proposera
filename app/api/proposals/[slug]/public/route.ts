@@ -9,6 +9,8 @@ interface RouteParams {
   params: Promise<{ slug: string }>;
 }
 
+export const dynamic = "force-dynamic";
+
 /**
  * GET /api/proposals/[slug]/public
  * Unauthenticated public endpoint returning the sanitized public projection.

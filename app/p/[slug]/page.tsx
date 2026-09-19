@@ -7,6 +7,9 @@ import {
 } from "@/lib/db/repositories";
 import SceneOrchestrator from "@/components/scenes/SceneOrchestrator";
 
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+
 interface RecipientPageProps {
   params: Promise<{
     slug: string;
