@@ -8,17 +8,21 @@ import { CreateResponseSchema } from "@/lib/validation/schemas";
 import crypto from "node:crypto";
 
 interface RouteParams {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ id?: string; slug?: string }>;
 }
 
+export const dynamic = "force-dynamic";
+
 /**
- * POST /api/proposals/[slug]/respond
+ * POST /api/proposals/[id]/respond
  * Public unauthenticated endpoint for capturing recipient responses.
- * Resolves proposal by slug; rejects unreleased/draft/unpublished proposals with 404 non-disclosure.
+ * Resolves proposal by slug (where [id] in the URL captures the proposal slug).
+ * Rejects unreleased/draft/unpublished proposals with 404 non-disclosure.
  * Persists response to database and returns 201 Created.
  */
 export async function POST(request: NextRequest, { params }: RouteParams) {
-  const { slug } = await params;
+  const resolved = await params;
+  const slug = resolved.id || resolved.slug || "";
   const db = getDb();
 
   // Non-disclosure: must only accept responses for active PUBLISHED proposals

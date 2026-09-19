@@ -17,8 +17,8 @@ import { POST as postOrderHandler } from "@/app/api/billing/order/route";
 import { POST as postVerifyHandler } from "@/app/api/billing/verify/route";
 import { POST as postWebhookHandler } from "@/app/api/billing/webhook/route";
 import { POST as publishProposalHandler } from "@/app/api/proposals/[id]/publish/route";
-import { GET as getPublicProposalHandler } from "@/app/api/proposals/[slug]/public/route";
-import { POST as postRespondHandler } from "@/app/api/proposals/[slug]/respond/route";
+import { GET as getPublicProposalHandler } from "@/app/api/proposals/[id]/public/route";
+import { POST as postRespondHandler } from "@/app/api/proposals/[id]/respond/route";
 import * as dbModule from "@/lib/db";
 
 const TEST_KEY_SECRET = "test_razorpay_secret_key_12345";

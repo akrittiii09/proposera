@@ -6,19 +6,21 @@ import {
 } from "@/lib/db/repositories";
 
 interface RouteParams {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ id?: string; slug?: string }>;
 }
 
 export const dynamic = "force-dynamic";
 
 /**
- * GET /api/proposals/[slug]/public
+ * GET /api/proposals/[id]/public
  * Unauthenticated public endpoint returning the sanitized public projection.
+ * Resolves by slug (where [id] in the URL captures the proposal slug).
  * Enforces strict non-disclosure (indistinguishable 404 for drafts, unpublished,
  * deleted, or non-existent proposals).
  */
 export async function GET(_request: NextRequest, { params }: RouteParams) {
-  const { slug } = await params;
+  const resolved = await params;
+  const slug = resolved.id || resolved.slug || "";
   const db = getDb();
 
   // Find only published proposals matching the slug

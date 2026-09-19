@@ -12,8 +12,8 @@ import {
 } from "@/lib/db/repositories";
 import { hashPassword } from "@/lib/auth/password";
 import { createSession, SESSION_COOKIE_NAME } from "@/lib/auth/session";
-import { GET as getPublicProposalHandler } from "@/app/api/proposals/[slug]/public/route";
-import { POST as postRespondHandler } from "@/app/api/proposals/[slug]/respond/route";
+import { GET as getPublicProposalHandler } from "@/app/api/proposals/[id]/public/route";
+import { POST as postRespondHandler } from "@/app/api/proposals/[id]/respond/route";
 import { GET as getResponsesHandler } from "@/app/api/proposals/[id]/responses/route";
 import {
   PATCH as patchProposalHandler,
