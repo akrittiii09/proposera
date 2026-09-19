@@ -42,8 +42,6 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
-lib64/
 parts/
 sdist/
 var/
@@ -52,6 +50,8 @@ wheels/
 .installed.cfg
 *.egg
 .env
+.env*.local
+*.tsbuildinfo
 .venv
 venv/
 ENV/
