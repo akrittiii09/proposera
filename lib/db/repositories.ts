@@ -390,6 +390,23 @@ export function createResponse(
 }
 
 /**
+ * Retrieves the most recent response for a given proposal ID.
+ */
+export function findLatestResponseByProposalId(
+  db: DatabaseSync,
+  proposalId: string
+): ResponseRecord | null {
+  const stmt = db.prepare(`
+    SELECT * FROM responses
+    WHERE proposal_id = ?
+    ORDER BY created_at DESC
+    LIMIT 1
+  `);
+  const row = stmt.get(proposalId);
+  return (row as unknown as ResponseRecord) || null;
+}
+
+/**
  * Retrieves responses belonging to a proposal.
  * Enforces ownership check: verifies proposal belongs to creatorId.
  */

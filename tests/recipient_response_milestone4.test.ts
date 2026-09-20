@@ -272,6 +272,146 @@ describe("Milestone 4: Public Recipient Delivery & Response Capture", () => {
       const json = await res.json();
       expect(json.error).toBe("Proposal not found");
     });
+
+    it("rejects response submitted to an UNPUBLISHED proposal with 404 non-disclosure", async () => {
+      updateProposalStatus(dbModule.getDb(), publishedProposalId, creator1.id, "UNPUBLISHED");
+
+      const req = new NextRequest(`http://localhost:3000/api/proposals/${publishedSlug}/respond`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          choice: "YES_FOREVER",
+        }),
+      });
+
+      const res = await postRespondHandler(req, {
+        params: Promise.resolve({ slug: publishedSlug }),
+      });
+
+      expect(res.status).toBe(404);
+      const json = await res.json();
+      expect(json.error).toBe("Proposal not found");
+    });
+
+    it("rejects response submitted to a DELETED proposal with 404 non-disclosure", async () => {
+      updateProposalStatus(dbModule.getDb(), publishedProposalId, creator1.id, "DELETED");
+
+      const req = new NextRequest(`http://localhost:3000/api/proposals/${publishedSlug}/respond`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          choice: "YES_FOREVER",
+        }),
+      });
+
+      const res = await postRespondHandler(req, {
+        params: Promise.resolve({ slug: publishedSlug }),
+      });
+
+      expect(res.status).toBe(404);
+      const json = await res.json();
+      expect(json.error).toBe("Proposal not found");
+    });
+
+    it("rejects response submitted to a non-existent proposal slug with 404 non-disclosure", async () => {
+      const req = new NextRequest("http://localhost:3000/api/proposals/non-existent-slug-xyz/respond", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          choice: "YES_FOREVER",
+        }),
+      });
+
+      const res = await postRespondHandler(req, {
+        params: Promise.resolve({ slug: "non-existent-slug-xyz" }),
+      });
+
+      expect(res.status).toBe(404);
+      const json = await res.json();
+      expect(json.error).toBe("Proposal not found");
+    });
+
+    it("handles duplicate/repeated submission following the deterministic idempotency rule", async () => {
+      const payload = {
+        choice: "YES_WITH_ALL_MY_HEART",
+        customNote: "Can't wait to grow old together!",
+      };
+
+      // First submission
+      const req1 = new NextRequest(`http://localhost:3000/api/proposals/${publishedSlug}/respond`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const res1 = await postRespondHandler(req1, {
+        params: Promise.resolve({ slug: publishedSlug }),
+      });
+
+      expect(res1.status).toBe(201);
+      const json1 = await res1.json();
+      expect(json1.success).toBe(true);
+      expect(json1.duplicate).toBe(false);
+      const firstResponseId = json1.response.id;
+
+      // Second identical submission (e.g. browser retry or rapid double click)
+      const req2 = new NextRequest(`http://localhost:3000/api/proposals/${publishedSlug}/respond`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const res2 = await postRespondHandler(req2, {
+        params: Promise.resolve({ slug: publishedSlug }),
+      });
+
+      expect(res2.status).toBe(200);
+      const json2 = await res2.json();
+      expect(json2.success).toBe(true);
+      expect(json2.duplicate).toBe(true);
+      expect(json2.response.id).toBe(firstResponseId);
+
+      // Verify that database row count remains exactly 1 and no duplicate junk row was created
+      const dbResponses = findResponsesByProposalId(dbModule.getDb(), publishedProposalId, creator1.id);
+      expect(dbResponses).toHaveLength(1);
+      expect(dbResponses?.[0].id).toBe(firstResponseId);
+    });
+
+    it("records a new response entry when recipient submits an updated or modified answer", async () => {
+      // First submission
+      const req1 = new NextRequest(`http://localhost:3000/api/proposals/${publishedSlug}/respond`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          choice: "YES_OF_COURSE",
+          customNote: "First thought",
+        }),
+      });
+      const res1 = await postRespondHandler(req1, {
+        params: Promise.resolve({ slug: publishedSlug }),
+      });
+      expect(res1.status).toBe(201);
+
+      // Revised submission (e.g. adding more detail)
+      const req2 = new NextRequest(`http://localhost:3000/api/proposals/${publishedSlug}/respond`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          choice: "YES_OF_COURSE",
+          customNote: "First thought, and also booking our flight!",
+        }),
+      });
+      const res2 = await postRespondHandler(req2, {
+        params: Promise.resolve({ slug: publishedSlug }),
+      });
+      expect(res2.status).toBe(201);
+      const json2 = await res2.json();
+      expect(json2.duplicate).toBe(false);
+
+      // Verify both entries exist and are ordered newest-first
+      const dbResponses = findResponsesByProposalId(dbModule.getDb(), publishedProposalId, creator1.id);
+      expect(dbResponses).toHaveLength(2);
+      expect(dbResponses?.[0].custom_note).toBe("First thought, and also booking our flight!");
+      expect(dbResponses?.[1].custom_note).toBe("First thought");
+    });
   });
 
   describe("Creator Response Access (GET /api/proposals/[id]/responses)", () => {
