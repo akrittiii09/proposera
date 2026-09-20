@@ -3,7 +3,6 @@ import { getDb } from "@/lib/db";
 import {
   findCreatorByEmail,
   createCreator,
-  createOrUpdateEntitlement,
 } from "@/lib/db/repositories";
 import { hashPassword } from "@/lib/auth/password";
 import {
@@ -43,13 +42,6 @@ export async function POST(request: NextRequest) {
       email,
       passwordHash,
       role: "CREATOR",
-    });
-
-    // Initialize entitlement as INACTIVE (paywall boundary: no automatic paid access)
-    createOrUpdateEntitlement(db, {
-      creatorId: creator.id,
-      status: "INACTIVE",
-      provider: "RAZORPAY",
     });
 
     // Establish authenticated session

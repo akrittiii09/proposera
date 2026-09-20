@@ -17,9 +17,6 @@ import {
   deleteProposal,
   createResponse,
   findResponsesByProposalId,
-  createOrUpdateEntitlement,
-  findEntitlementByCreatorId,
-  isCreatorEntitled,
 } from "@/lib/db/repositories";
 
 describe("Database Foundation & Repositories", () => {
@@ -42,7 +39,6 @@ describe("Database Foundation & Repositories", () => {
       expect(tables).toContain("creators");
       expect(tables).toContain("proposals");
       expect(tables).toContain("responses");
-      expect(tables).toContain("creator_entitlements");
       expect(tables).toContain("sessions");
     });
 
@@ -277,28 +273,6 @@ describe("Database Foundation & Repositories", () => {
       // Other creator attempts to retrieve responses -> rejected (returns null)
       const unauthorizedResponses = findResponsesByProposalId(db, proposal.id, otherCreator.id);
       expect(unauthorizedResponses).toBeNull();
-    });
-  });
-
-  describe("Entitlement Operations (Razorpay Paywall)", () => {
-    it("manages creator entitlement lifecycle", () => {
-      const creator = createCreator(db, { email: "pay@test.com", passwordHash: "h" });
-      expect(isCreatorEntitled(db, creator.id)).toBe(false);
-
-      // Create ACTIVE entitlement
-      createOrUpdateEntitlement(db, {
-        creatorId: creator.id,
-        status: "ACTIVE",
-        externalReference: "pay_123456789",
-      });
-      expect(isCreatorEntitled(db, creator.id)).toBe(true);
-
-      // Update to INACTIVE
-      createOrUpdateEntitlement(db, {
-        creatorId: creator.id,
-        status: "INACTIVE",
-      });
-      expect(isCreatorEntitled(db, creator.id)).toBe(false);
     });
   });
 });

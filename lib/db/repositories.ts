@@ -2,7 +2,6 @@ import { DatabaseSync } from "node:sqlite";
 import crypto from "node:crypto";
 
 export type ProposalStatus = "DRAFT" | "PUBLISHED" | "UNPUBLISHED" | "ARCHIVED" | "DELETED";
-export type EntitlementStatus = "ACTIVE" | "INACTIVE" | "TRIAL";
 
 export interface CreatorRecord {
   id: string;
@@ -47,17 +46,6 @@ export interface ResponseRecord {
   created_at: string;
 }
 
-export interface CreatorEntitlementRecord {
-  id: string;
-  creator_id: string;
-  status: EntitlementStatus;
-  provider: string;
-  external_reference: string | null;
-  order_id: string | null;
-  payment_id: string | null;
-  created_at: string;
-  updated_at: string;
-}
 
 export interface SessionRecord {
   id: string;
@@ -426,100 +414,4 @@ export function findResponsesByProposalId(
     ORDER BY created_at DESC
   `);
   return (stmt.all(proposalId) as unknown as ResponseRecord[]) || [];
-}
-
-// -----------------------------------------------------------------------------
-// Creator Entitlement Repository (Razorpay Paywall)
-// -----------------------------------------------------------------------------
-export function createOrUpdateEntitlement(
-  db: DatabaseSync,
-  data: {
-    creatorId: string;
-    status: EntitlementStatus;
-    provider?: string;
-    externalReference?: string | null;
-    orderId?: string | null;
-    paymentId?: string | null;
-  }
-): CreatorEntitlementRecord {
-  const existing = findEntitlementByCreatorId(db, data.creatorId);
-  const now = new Date().toISOString();
-  const provider = data.provider || "RAZORPAY";
-  const externalRef = data.externalReference !== undefined ? data.externalReference : (existing?.external_reference ?? null);
-  const orderId = data.orderId !== undefined ? data.orderId : (existing?.order_id ?? null);
-  const paymentId = data.paymentId !== undefined ? data.paymentId : (existing?.payment_id ?? null);
-
-  if (existing) {
-    const stmt = db.prepare(`
-      UPDATE creator_entitlements
-      SET status = ?, provider = ?, external_reference = ?, order_id = ?, payment_id = ?, updated_at = ?
-      WHERE creator_id = ?
-    `);
-    stmt.run(data.status, provider, externalRef, orderId, paymentId, now, data.creatorId);
-
-    return {
-      ...existing,
-      status: data.status,
-      provider,
-      external_reference: externalRef,
-      order_id: orderId,
-      payment_id: paymentId,
-      updated_at: now,
-    };
-  } else {
-    const id = crypto.randomUUID();
-    const stmt = db.prepare(`
-      INSERT INTO creator_entitlements (
-        id, creator_id, status, provider, external_reference, order_id, payment_id, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-    stmt.run(id, data.creatorId, data.status, provider, externalRef, orderId, paymentId, now, now);
-
-    return {
-      id,
-      creator_id: data.creatorId,
-      status: data.status,
-      provider,
-      external_reference: externalRef,
-      order_id: orderId,
-      payment_id: paymentId,
-      created_at: now,
-      updated_at: now,
-    };
-  }
-}
-
-export function findEntitlementByCreatorId(
-  db: DatabaseSync,
-  creatorId: string
-): CreatorEntitlementRecord | null {
-  const stmt = db.prepare("SELECT * FROM creator_entitlements WHERE creator_id = ?");
-  const row = stmt.get(creatorId) as unknown as CreatorEntitlementRecord | undefined;
-  return row || null;
-}
-
-export function findEntitlementByOrderId(
-  db: DatabaseSync,
-  orderId: string
-): CreatorEntitlementRecord | null {
-  const stmt = db.prepare("SELECT * FROM creator_entitlements WHERE order_id = ?");
-  const row = stmt.get(orderId) as unknown as CreatorEntitlementRecord | undefined;
-  return row || null;
-}
-
-export function findEntitlementByPaymentId(
-  db: DatabaseSync,
-  paymentId: string
-): CreatorEntitlementRecord | null {
-  const stmt = db.prepare("SELECT * FROM creator_entitlements WHERE payment_id = ?");
-  const row = stmt.get(paymentId) as unknown as CreatorEntitlementRecord | undefined;
-  return row || null;
-}
-
-/**
- * Returns true if creator has an ACTIVE entitlement allowing publishing.
- */
-export function isCreatorEntitled(db: DatabaseSync, creatorId: string): boolean {
-  const entitlement = findEntitlementByCreatorId(db, creatorId);
-  return entitlement?.status === "ACTIVE";
 }

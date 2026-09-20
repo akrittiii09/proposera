@@ -24,14 +24,13 @@ Proposera is designed with strict separation of concerns, ensuring high performa
 │  │  Validation Layer (Schema validation, File magic-number scan)    │  │
 │  ├──────────────────────────────────────────────────────────────────┤  │
 │  │  Services: ProposalService | MediaService | PublishingService    │  │
-│  │            PaymentService (Razorpay Webhooks — Deferred)         │  │
 │  └────────────┬──────────────────────────────┬──────────────────────┘  │
 └───────────────┼──────────────────────────────┼─────────────────────────┘
                 ▼                              ▼
 ┌──────────────────────────────┐ ┌───────────────────────────────────────┐
 │       DATABASE LAYER         │ │         OBJECT STORAGE (BLOB)         │
 │  (Relational DB / Postgres)  │ │   (Private Bucket & Public CDN)       │
-│  - Creators & Entitlements   │ │   - Media Assets                      │
+│  - Creators                  │ │   - Media Assets                      │
 │  - Proposals & Stories       │ │   - Stripped EXIF, Optimized WebP     │
 │  - Response Records          │ │                                       │
 └──────────────────────────────┘ └───────────────────────────────────────┘
@@ -44,7 +43,6 @@ Proposera is designed with strict separation of concerns, ensuring high performa
 | **Frontend (Studio)** | Creator workspace, authoring forms, live preview controls. | Client-side (Browser) | Untrusted; all form values subject to server validation. | Server handles auth; client performs cosmetic validation only. |
 | **Frontend (Recipient)**| Immersive, lightweight, responsive proposal narrative. | Client-side (Browser) | Untrusted; recipient has zero write rights except response token. | Served via unauthenticated read projection; no secrets exposed. |
 | **Backend API** | Business logic, state management, file ingestion, projection. | Server-side | Never trust: client MIME headers, user IDs, publication status flags. | Strict server-side validation and ownership verification. |
-| **Payment Gateway (Razorpay)** | Checkout modal, payment verification, webhook ingestion. *(DECIDED Q1, Implementation DEFERRED)* | External / Server-side Webhook | Untrusted client checkout responses; verify signatures via Razorpay secret. | Entitlement granted only upon cryptographically verified webhook or server capture. |
 | **Database** | Relational integrity, atomic commits, draft and proposal storage. | Server-side / DB | Sanitized parameterized inputs only; no direct client SQL. | Enforced by ORM/data-access repository layers. |
 | **Object Storage** | Storing binary media assets (images, audio). | Cloud Storage | Never trust client file streams; scanned before final move. | Pre-signed upload credentials with strict byte and content limits. |
 | **Observability** | Error tracking, health telemetry, performance metrics. | Server & Edge | Strip all PII, partner names, romantic messages before logging. | Log sanitization filters enforced at transport middleware. |

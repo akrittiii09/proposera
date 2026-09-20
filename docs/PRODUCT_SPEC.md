@@ -17,7 +17,7 @@ Proposera serves two fundamentally distinct experiences:
 ### 2.1 Creator (Author / Account Owner)
 - **Definition**: The individual planning and delivering the proposal.
 - **Intent**: Craft a highly tailored digital journey celebrating a shared relationship, preview it with fidelity, publish it to a shareable secret URL, present or send it to their partner, manage its state (unpublish, update slug, or edit), and review the recipient's response.
-- **Authentication & Signup**: **DECIDED**. Public creator signup is supported. Creators authenticate via secure session/token credentials. Access to proposal authoring and publishing functionality is gated by a **Razorpay-based payment/entitlement system** (payment implementation DEFERRED to Phase 2+).
+- **Authentication & Signup**: **DECIDED**. Public creator signup is supported. Creators authenticate via secure session credentials. Proposal creation, authoring, and publishing are directly available without payment. Proposera MVP has **NO paywall**, and Razorpay/payment is not required for publishing.
 - **Privilege Level**: Full write and read access exclusively to their own created proposals, media, responses, and configurations. Zero access to other creators' proposals.
 
 ### 2.2 Recipient (Partner)
@@ -36,10 +36,10 @@ Proposera serves two fundamentally distinct experiences:
 
 ### 3.1 Creator Journey
 ```text
-Signup → Authentication → Payment / Entitlement → Create Proposal → Configure → Save Draft → Preview → Publish → Secret Proposal URL (and Live Edits)
+Signup → Authentication → Create Proposal → Configure → Save Draft → Preview → Publish (Free) → Secret Proposal URL (and Live Edits)
 ```
 1. **Public Signup & Authentication**: Creator registers publicly on the Proposera platform and signs in.
-2. **Payment / Entitlement Gate**: Creator completes payment via Razorpay to unlock creation/publishing entitlements (commercial terms and checkout logic DEFERRED to Phase 2+).
+2. **Direct Proposal Creation**: Proposal authoring and live publishing are directly available to authenticated creators with no payment or paywall gate.
 3. **Proposal Initialization**: Initiates a new proposal; system provisions a draft record with default structural scenes.
 4. **Partner & Narrative Setup**: Enters partner details (names, nicknames, key dates, relationship milestones).
 5. **Media Assembly**: Selects and uploads personal photos/media through an authenticated upload pipeline; system validates, sanitizes, and previews media.
@@ -123,7 +123,7 @@ Secret Proposal URL → No Login Required → Proposal Experience → Reach Prop
 | :--- | :--- | :--- | :--- |
 | **Routes** | `/app/proposals/*`, `/app/settings/*` | `/app/proposals/[id]/preview` | `/p/[slug]` (Secret/Random URL) |
 | **Authentication** | Required (Public signup + Session token) | Required (Strict Creator Session) | **Zero Authentication** (No login, no accounts, no passwords) |
-| **Data Readable** | Full proposal entity: content, status, media, responses, entitlement | Working draft content, active theme, uncommitted state | **Public Projection Allowlist Only**: sanitized recipient content, media URLs, active theme styling |
+| **Data Readable** | Full proposal entity: content, status, media, responses | Working draft content, active theme, uncommitted state | **Public Projection Allowlist Only**: sanitized recipient content, media URLs, active theme styling |
 | **Data Writable** | Full CRUD on creator's own proposals, uploads, and account metadata | Ephemeral preview controls; no persistent write | Emotional response submission only (**Persisted to Database**, DECIDED Q2) |
 | **Code Shipped to Client** | Studio UI: Editors, form pickers, media uploaders, layout controls, management toolbars | Shared Scene Renderer + lightweight preview inspector chrome | **Shared Scene Renderer ONLY**; zero studio/editor code, zero authoring bundles |
 | **Caching Strategy** | `Cache-Control: private, no-store` | `Cache-Control: private, no-store` | Edge/CDN cacheable with stale-while-revalidate; revalidated immediately on creator edits |
@@ -139,7 +139,7 @@ Every capability from the owner vision and decisions is categorized below.
 | Capability | Scope Tier | Origin & Authority Category | Justification & Architectural Rationale |
 | :--- | :--- | :--- | :--- |
 | **Public Creator Signup & Auth** | **MUST HAVE** | Owner Decision (DECIDED - Q1) | Creators register publicly and authenticate to manage proposals. |
-| **Razorpay Payment & Entitlement** | **MUST HAVE** | Owner Decision (DECIDED - Q1) | Paywall gates proposal creation/publishing (Implementation DEFERRED to Phase 2+). |
+| **Free Publishing Without Paywall** | **MUST HAVE** | Owner Decision (Revised - No Paywall) | Proposal publishing is available to authenticated creators without payment. |
 | **Personalized Names & Nicknames** | **MUST HAVE** | Owner-Stated Requirement | Core identity element of the romantic narrative. |
 | **Romantic Messages & Letters** | **MUST HAVE** | Owner-Stated Requirement | Primary emotional medium of the proposal. |
 | **Photo Upload & Display** | **MUST HAVE** | Owner-Stated Requirement | Core visual storytelling medium across relationship milestones. |
@@ -163,7 +163,7 @@ Every capability from the owner vision and decisions is categorized below.
 | **Video Uploads & Streaming** | **FUTURE/DEFERRED**| Deferred Scope (Phase 14) | Bandwidth, transcoding, and hosting storage costs exceed Phase 1 MVP constraints. |
 
 > [!IMPORTANT]
-> Capabilities placed in **SHOULD HAVE** (Playful Interactions, Ambient Music) remain flagged for Owner Confirmation. Razorpay commercial terms remain an **OPEN QUESTION (Q1-A)**.
+> Capabilities placed in **SHOULD HAVE** (Playful Interactions, Ambient Music) remain flagged for Owner Confirmation. Proposera MVP has no paywall; Razorpay is removed from the MVP.
 
 ---
 

@@ -101,15 +101,15 @@
 
 ---
 
-### DEC-011: Public Creator Signup with Razorpay Paywall
-- **Decision**: Proposera permits public creator registration. Access to relevant paid proposal authoring/publishing functionality is gated by a Razorpay-based payment and entitlement system.
-- **Status**: **DECIDED**
-- **Source**: Owner Decision Q1 (Phase 1 Owner Decision Update).
-- **Reason**: Enables direct commercialization and self-serve onboarding. Razorpay is the owner's selected payment provider.
-- **Alternatives Considered**: Invite-only cohorts, owner-only admin account, Stripe. (Rejected by owner).
-- **Tradeoffs**: Requires payment gateway integration, webhook handlers, and entitlement state management.
-- **Consequences**: Clear separation between public account registration and paid feature entitlements. Razorpay integration is deferred to Phase 2+.
-- **Reversibility**: COSTLY.
+### DEC-011: Public Creator Signup Without Paywall (No Payment Gate)
+- **Decision**: Proposera permits public creator registration. Proposal authoring and live publishing are available to authenticated creators without payment. Proposera MVP has NO paywall, and Razorpay/payment is not required for publishing.
+- **Status**: **DECIDED (Revised)**
+- **Source**: Owner Decision (Revised - Paywall Removed from MVP).
+- **Reason**: Removes onboarding friction and payment barriers; allows seamless romantic journey creation and publishing for authenticated creators without payment gate.
+- **Alternatives Considered**: Paid Razorpay paywall, subscription models (both rejected for MVP).
+- **Tradeoffs**: No upfront monetization in MVP; maximum adoption and friction-free user delight.
+- **Consequences**: Zero payment integration complexity, zero webhook dependency, zero payment credentials needed.
+- **Reversibility**: REVERSIBLE.
 
 ---
 
@@ -156,9 +156,9 @@
 
 ### 3.1 Owner Decision Register (Resolved)
 
-#### Q1 — Creator Signup
-- **Status**: **DECIDED**
-- **Decision**: Public creator signup with Razorpay paywall. Proposera will allow creators to publicly sign up. Access to relevant paid functionality is controlled by a Razorpay-based payment/entitlement system. Razorpay is the chosen payment provider. Implementation is DEFERRED to Phase 2+.
+#### Q1 — Creator Signup & Publishing
+- **Status**: **DECIDED (Revised)**
+- **Decision**: Public creator signup without paywall. Proposera allows creators to publicly register. Proposal creation, authoring, and live publishing are directly available to authenticated creators without payment. Razorpay is NOT part of the MVP and is not required for publishing.
 
 #### Q2 — Response Persistence
 - **Status**: **DECIDED**
@@ -177,10 +177,8 @@
 ### 3.2 Remaining Open Questions Register (Awaiting Owner Decision)
 
 #### Q1-A: Razorpay Commercialization Specifics
-- **Why It Matters**: Dictates checkout session creation, webhook payload parsing, and entitlement expiration logic.
-- **Unresolved Elements**: Exact pricing, one-time payment vs. subscription, trial period, refund policy, currency support, and tax calculation.
-- **Status**: **OPEN QUESTION**
-- **Blocking Phase**: Blocks Phase 2+ (Payment & Entitlement Implementation).
+- **Status**: **REMOVED / DEPRECATED**
+- **Resolution**: Proposera MVP has no paywall; Razorpay/payment is removed from MVP scope. No commercialization gate is required for proposal publishing.
 
 ---
 
@@ -237,7 +235,7 @@ The following items are recognized as out-of-scope for Phase 1 and are intention
 | Deferred Capability | Target Phase | Dependency / Reason |
 | :--- | :--- | :--- |
 | **Creator Authentication Implementation** | Phase 2 | Scheduled for implementation following Q1 public signup decision. |
-| **Razorpay Payment & Entitlement Integration** | Phase 2+ | Depends on Q1-A pricing and entitlement model resolution. |
+| **Razorpay Payment & Entitlement Integration** | REMOVED | Removed from MVP per product decision (publishing is free for authenticated creators). |
 | **Database Migrations & ORM Setup** | Phase 2 | Scheduled for implementation following live mutable data model approval. |
 | **Media Upload Ingestion Worker** | Phase 6 | Requires object store provisioning and API scaffolding. |
 | **Curated Audio Engine & Autoplay Handler**| Phase 7 | Depends on Q5 resolution. |

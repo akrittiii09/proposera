@@ -3,7 +3,6 @@ import { requireAuth } from "@/lib/auth/requireAuth";
 import { getDb } from "@/lib/db";
 import {
   findProposalsByCreatorId,
-  findEntitlementByCreatorId,
 } from "@/lib/db/repositories";
 import LogoutButton from "@/components/auth/LogoutButton";
 
@@ -17,7 +16,6 @@ export default async function ProposalsDashboardPage() {
   const db = getDb();
 
   const proposals = findProposalsByCreatorId(db, creator.id);
-  const entitlement = findEntitlementByCreatorId(db, creator.id);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -74,30 +72,6 @@ export default async function ProposalsDashboardPage() {
 
       {/* Main Workspace */}
       <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
-        {/* Entitlement Banner (Paywall Boundary Preserved) */}
-        <div className="mb-8 flex flex-col justify-between gap-3 rounded-xl border border-neutral-200 bg-white p-4 shadow-sm sm:flex-row sm:items-center dark:border-neutral-800 dark:bg-neutral-900">
-          <div>
-            <div className="flex items-center space-x-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
-                Account Entitlement Status:
-              </span>
-              <span
-                className={`inline-flex items-center rounded px-2 py-0.5 text-xs font-medium ${
-                  entitlement?.status === "ACTIVE"
-                    ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-200"
-                    : "bg-neutral-100 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-200"
-                }`}
-              >
-                {entitlement?.status || "INACTIVE (Free Tier)"}
-              </span>
-            </div>
-            <p className="mt-1 text-xs text-neutral-600 dark:text-neutral-400">
-              {entitlement?.status === "ACTIVE"
-                ? "Full authoring & live publishing unlocked via Razorpay entitlement."
-                : "Free creator tier. Proposal authoring active; publishing is gated via Razorpay paywall."}
-            </p>
-          </div>
-        </div>
 
         {/* Proposals Section */}
         <div className="mb-6 flex items-center justify-between">

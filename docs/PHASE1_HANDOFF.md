@@ -17,7 +17,7 @@ All items below originate directly from owner instructions, prompt constraints, 
 4. **Authoritative Server-Side Validation & Auth**: Zero trust in client validation alone; strict ownership verification on every creator endpoint; drafts and unpublished proposals return an identical 404 to unauthenticated outsiders. *(Source: Phase 1 Prompt, Section 3)*
 5. **Non-Manipulative & Accessible Response**: Proposal response interaction prohibits deceptive mechanics (no fleeing buttons) and strictly supports accessible controls and reduced motion. *(Source: Phase 1 Prompt, Section 3)*
 6. **Mobile-First Sensory Baseline**: Recipient experience is engineered primarily for mobile phone viewports (360px–430px) with touch targets $\ge 48\times 48\text{ px}$. *(Source: Phase 1 Prompt, Section 3)*
-7. **Public Creator Signup with Paywall (DEC-008 / Q1)**: Creators may publicly sign up. Access to paid publishing functionality is gated by a Razorpay paywall. Razorpay is the owner-selected provider; concrete payment implementation is deferred to Phase 2+. *(Source: Owner Decision Q1)*
+7. **Public Creator Signup Without Paywall (DEC-008 / Q1)**: Creators may publicly sign up. Proposal authoring and live publishing are directly available without payment. Proposera MVP has NO paywall; Razorpay is not required for publishing. *(Source: Owner Decision Q1)*
 8. **Persisted Recipient Responses (DEC-002 / Q2)**: Recipient responses (affirmative choice, timestamp, optional message) MUST be stored in the database and visible to the creator in Creator Studio. *(Source: Owner Decision Q2)*
 9. **Public Proposal Access via Secret URL (DEC-009 / Q3)**: Recipient accesses proposal via unguessable random slug (`/p/[slug]`) without authentication (no recipient login/accounts/passwords). Creator DOES authenticate. *(Source: Owner Decision Q3)*
 10. **Live Mutable Published Proposals (DEC-007 / Q4)**: Published proposals are live and mutable. Edits immediately update the published experience upon saving. Immutable publication snapshots are explicitly REJECTED for MVP. Proposal version history/rollback is DEFERRED. *(Source: Owner Decision Q4)*
@@ -43,7 +43,7 @@ All items below originate directly from owner instructions, prompt constraints, 
 | :--- | :--- | :--- |
 | **Creator Authentication & Session Implementation** | Phase 2 | Concrete implementation deferred to Phase 2 (Public signup decided in Q1). |
 | **Database Migrations & ORM Implementation** | Phase 2 | Concrete implementation deferred to Phase 2 (Live mutable model decided in Q4). |
-| **Razorpay Payment Gateway Integration & Webhooks** | Phase 2+ | Provider selected (Razorpay); commercialization details (Q1-A) pending owner decision. |
+| **Razorpay Payment Gateway Integration** | Removed | Removed from MVP per product decision (publishing is free for authenticated creators). |
 | **Media Upload Worker & Ingestion Pipeline** | Phase 6 | Requires object store provisioning and API scaffolding. |
 | **Ambient Music Engine & Autoplay Handler** | Phase 7 | Depends on Q5 audio source decision. |
 | **Playful Micro-Interactions (Scratch/Flip)** | Phase 8 | Non-blocking narrative enhancement. |
@@ -87,13 +87,13 @@ All files are created exclusively under `docs/` in accordance with Section 9:
 ## 6. Open Questions Register
 
 The following questions have been resolved by owner decisions:
-- **Q1 (Creator Signup)**: **DECIDED**. Public creator signup with paywall. Razorpay selected; concrete implementation deferred to Phase 2+.
+- **Q1 (Creator Signup & Publishing)**: **DECIDED (Revised)**. Public creator signup without paywall. Publishing is available to authenticated creators without payment. Razorpay is not required.
 - **Q2 (Response Persistence)**: **DECIDED**. Recipient responses must be persisted and visible to creator in Creator Studio.
 - **Q3 (Public Proposal Access)**: **DECIDED**. Public proposal access via secret unguessable URL; zero recipient authentication (no accounts/passwords/PINs). Creator authenticates.
 - **Q4 (Edit After Publish)**: **DECIDED**. Published proposals are live and mutable. Edits immediately update live view. Immutable snapshots rejected for MVP.
 
 The following open questions remain awaiting owner decision:
-- **Q1-A**: Razorpay commercialization details (pricing tiers, currency, billing model).
+- **Q1-A**: Razorpay commercialization details (REMOVED: No paywall in MVP).
 - **Q5**: Music source policy (Proposed default: Curated royalty-free ambient tracks in MVP).
 - **Q6**: Supported device and browser baseline (Proposed default: Modern mobile Safari/Chrome, evergreen desktop).
 - **Q7**: Language and script scope (Proposed default: English UI, arbitrary UTF-8 narrative text).
@@ -163,6 +163,6 @@ All verification checks were executed against the Phase 1 documentation changes 
 
 Before initiating Phase 2 (Foundation & Setup), the owner may:
 1. Review and confirm the updated Phase 1 specifications and decision records in `docs/DECISIONS.md`.
-2. Provide guidance on Open Question **Q1-A** (Razorpay commercialization, pricing, and billing model) or allow Phase 2 to scaffold the schema with flexible entitlement states.
+2. Note that Razorpay is removed from the MVP and proposal publishing is free for authenticated creators.
 3. Confirm if SHOULD-HAVE capabilities (Playful Micro-Interactions, Ambient Music, Response Notifications) are included in early Phase 2 domain models.
 4. If instructed, commit the documentation files using: `docs(phase-1): complete product and architecture specification`.

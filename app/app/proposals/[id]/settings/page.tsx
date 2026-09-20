@@ -3,7 +3,6 @@ import { requireAuth } from "@/lib/auth/requireAuth";
 import { getDb } from "@/lib/db";
 import {
   findProposalById,
-  isCreatorEntitled,
   findResponsesByProposalId,
 } from "@/lib/db/repositories";
 import ProposalSettingsClient from "@/components/proposals/ProposalSettingsClient";
@@ -26,7 +25,6 @@ export default async function ProposalSettingsPage({ params }: ProposalSettingsP
     notFound();
   }
 
-  const entitled = isCreatorEntitled(db, creator.id);
   const rawResponses = findResponsesByProposalId(db, id, creator.id) || [];
 
   const initialResponses = rawResponses.map((r) => ({
@@ -39,7 +37,6 @@ export default async function ProposalSettingsPage({ params }: ProposalSettingsP
   return (
     <ProposalSettingsClient
       proposal={proposal}
-      isEntitled={entitled}
       initialResponses={initialResponses}
     />
   );

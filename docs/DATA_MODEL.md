@@ -2,14 +2,13 @@
 
 ## 1. Entity Architecture & Evaluation
 
-The Proposera domain model cleanly separates identity, commercial entitlement, editorial narrative, media assets, presentation styling, and recipient responses.
+The Proposera domain model cleanly separates identity, editorial narrative, media assets, presentation styling, and recipient responses.
 
 Below is the evaluation of domain entities under confirmed owner decisions:
 
 | Entity Name | Evaluation & Disposition | Rationale | In MVP? | Status Label |
 | :--- | :--- | :--- | :--- | :--- |
 | **Creator (User)** | Retained as distinct entity | Stores creator credentials, email, quota limits, and ownership pointers. | Yes | **REQUIRED** (DECIDED - Q1) |
-| **Creator Entitlement** | Conceptual access state | Gates proposal creation/publishing behind Razorpay paywall. Detailed schema deferred to Phase 2+. | Yes | **REQUIRED** (DECIDED - Q1) |
 | **Proposal** | Retained as root aggregate | The core entity governing lifecycle state, secret slug, ownership, and metadata. Live mutable when published. | Yes | **REQUIRED** (DECIDED - Q3/Q4) |
 | **Recipient Info** | Merged into Proposal Content | Embedded within Proposal Content to ensure atomic cohesion with the story. | Yes | **PROPOSED** |
 | **Proposal Content** | Retained as structured JSON/document | Working narrative payload. When proposal is published, edits to content update the live experience immediately. | Yes | **REQUIRED** (DECIDED - Q4) |
@@ -29,7 +28,7 @@ Below is the evaluation of domain entities under confirmed owner decisions:
 ### 2.1 Creator (User)
 - **Purpose**: Authenticated account identity of the author.
 - **Ownership**: Root owner entity.
-- **Relationships**: `1 Creator : N Proposals`, `1 Creator : N MediaAssets`, `1 Creator : 1 Entitlement`.
+- **Relationships**: `1 Creator : N Proposals`, `1 Creator : N MediaAssets`.
 - **Visibility**: **NEVER PUBLIC**. Private to creator session.
 - **Lifecycle**: Created upon public signup; updated on profile changes; soft-deleted upon account termination.
 - **MVP Relevance**: Essential for creator authentication, isolating proposals, and securing private drafts.
@@ -118,17 +117,8 @@ published_at         TIMESTAMPTZ  NULLABLE      Timestamp of initial publication
 }
 ```
 
-### 2.4 Creator Entitlement (Razorpay Paywall Concept — DECIDED Q1, Implementation DEFERRED)
-- **Purpose**: Tracks creator subscription status or payment entitlement resulting from Razorpay checkout.
-- **Ownership**: Belongs to `Creator`.
-- **Relationships**: `1 Entitlement : 1 Creator`.
-- **Visibility**: **PRIVATE**. Internal to creator account management and studio authorization.
-- **Lifecycle**: Created or updated upon Razorpay webhook/verification event. Controls access to publishing and paid features.
-- **MVP Relevance**: Enforces the creator paywall decided in Q1. Implementation details (pricing, billing cycles, webhooks) are deferred to Phase 2+.
-- **Necessity vs. Convenience**: **DECIDED (Required for Paid Workflows)**.
-- **Status**: **DECIDED (Concept) / IMPLEMENTATION DEFERRED (Phase 2+)**.
-
 > [!NOTE]
+> **No Paywall / Entitlement Gate**: Proposera MVP has no paywall; proposal creation, authoring, and publishing are directly available to authenticated creators without payment.
 > **Proposal Version History / Snapshots**: Immutable publication snapshots were explicitly rejected for MVP (DEC-007 / Q4). Published proposals are live and mutable; edits update the published view immediately. Proposal version history, rollback, and immutable publication snapshots are **DEFERRED (Phase 9+)**.
 
 ### 2.5 Media Asset

@@ -7,7 +7,6 @@ import {
   createProposal,
   findProposalById,
   updateProposalStatus,
-  createOrUpdateEntitlement,
   findResponsesByProposalId,
 } from "@/lib/db/repositories";
 import { hashPassword } from "@/lib/auth/password";
@@ -45,12 +44,6 @@ describe("Milestone 5: Live Mutable Publishing Integration", () => {
     });
     const s1 = createSession(dbModule.getDb(), creator1.id);
     sessionToken1 = s1.id;
-
-    // Entitle Creator 1 for publishing
-    createOrUpdateEntitlement(dbModule.getDb(), {
-      creatorId: creator1.id,
-      status: "ACTIVE",
-    });
 
     // Seed Creator 2
     const passHash2 = await hashPassword("Creator2Password123!");

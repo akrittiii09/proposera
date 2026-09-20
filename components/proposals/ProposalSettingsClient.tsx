@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ProposalRecord } from "@/lib/db/repositories";
-import PaywallCard from "@/components/billing/PaywallCard";
 
 export interface ProposalResponseItem {
   id: string;
@@ -15,18 +14,15 @@ export interface ProposalResponseItem {
 
 interface ProposalSettingsProps {
   proposal: ProposalRecord;
-  isEntitled: boolean;
   initialResponses?: ProposalResponseItem[];
 }
 
 export default function ProposalSettingsClient({
   proposal: initialProposal,
-  isEntitled: initialIsEntitled,
   initialResponses = [],
 }: ProposalSettingsProps) {
   const router = useRouter();
   const [proposal, setProposal] = useState<ProposalRecord>(initialProposal);
-  const [entitled, setEntitled] = useState(initialIsEntitled);
   const [responses] = useState<ProposalResponseItem[]>(initialResponses);
   const [slug, setSlug] = useState(proposal.slug);
   const [slugSaving, setSlugSaving] = useState(false);
@@ -84,13 +80,7 @@ export default function ProposalSettingsClient({
 
       const data = await res.json();
       if (!res.ok) {
-        if (res.status === 403) {
-          setPublishError(
-            data.error || "Publishing is gated behind an active Proposera entitlement. Payment required."
-          );
-        } else {
-          setPublishError(data.error || `Failed to ${action} proposal`);
-        }
+        setPublishError(data.error || `Failed to ${action} proposal`);
         setPublishing(false);
         return;
       }
@@ -212,7 +202,7 @@ export default function ProposalSettingsClient({
           </form>
         </div>
 
-        {/* Publication & Entitlement Gate */}
+        {/* Publication Management */}
         <div className="rounded-xl border border-neutral-200 bg-white p-6 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
           <div className="flex items-start justify-between">
             <div>
@@ -220,7 +210,7 @@ export default function ProposalSettingsClient({
                 Publication Status
               </h2>
               <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
-                Manage proposal visibility. Publishing requires an active Proposera Entitlement.
+                Manage proposal visibility. Publishing makes your proposal live on its unique link.
               </p>
             </div>
             <span
@@ -252,24 +242,12 @@ export default function ProposalSettingsClient({
             </div>
           )}
 
-          <div className="mt-4">
-            <PaywallCard
-              isEntitled={entitled}
-              onEntitled={() => {
-                setEntitled(true);
-                setPublishError(null);
-                router.refresh();
-              }}
-            />
-          </div>
-
           <div className="mt-6 flex flex-wrap items-center gap-3">
             {proposal.status !== "PUBLISHED" ? (
               <button
                 type="button"
                 onClick={() => handlePublishToggle("publish")}
-                disabled={publishing || !entitled}
-                title={!entitled ? "An active entitlement is required to publish." : undefined}
+                disabled={publishing}
                 className="rounded-lg bg-emerald-600 px-5 py-2 text-xs font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50"
               >
                 {publishing ? "Processing..." : "Publish Proposal"}

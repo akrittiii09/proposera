@@ -8,7 +8,6 @@ import {
   findCreatorById,
   createProposal,
   findProposalsByCreatorId,
-  findEntitlementByCreatorId,
 } from "@/lib/db/repositories";
 import { hashPassword } from "@/lib/auth/password";
 import {
@@ -68,11 +67,6 @@ describe("Milestone 2: Creator Authentication & Dashboard Integration", () => {
       expect(creatorInDb).not.toBeNull();
       expect(creatorInDb?.password_hash).not.toBe("SecurePassword123!");
       expect(creatorInDb?.password_hash).toMatch(/^\$2[ab]\$12\$/);
-
-      // Verify entitlement was initialized as INACTIVE (paywall boundary preserved)
-      const entitlement = findEntitlementByCreatorId(activeDb, creatorInDb!.id);
-      expect(entitlement).not.toBeNull();
-      expect(entitlement?.status).toBe("INACTIVE");
     });
 
     it("rejects duplicate email address safely", async () => {

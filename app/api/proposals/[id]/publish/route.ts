@@ -4,7 +4,6 @@ import { requireApiAuth } from "@/lib/auth/requireAuth";
 import {
   findProposalById,
   updateProposalStatus,
-  isCreatorEntitled,
 } from "@/lib/db/repositories";
 import { PublishActionSchema } from "@/lib/validation/schemas";
 
@@ -15,8 +14,7 @@ interface RouteParams {
 /**
  * POST /api/proposals/[id]/publish
  * Handles proposal publication state transitions.
- * Enforces creator ownership and the Razorpay paywall boundary:
- * Publishing without an ACTIVE entitlement is strictly rejected (HTTP 403).
+ * Enforces creator ownership: authenticated proposal owners can freely publish and unpublish.
  */
 export async function POST(request: NextRequest, { params }: RouteParams) {
   const authResult = await requireApiAuth(request);
@@ -49,19 +47,7 @@ export async function POST(request: NextRequest, { params }: RouteParams) {
     }
 
     if (action === "publish") {
-      // Server-side entitlement check (DEC-008 / Q1, DEC-011)
-      const entitled = isCreatorEntitled(db, authResult.auth.creator.id);
-      if (!entitled) {
-        return NextResponse.json(
-          {
-            error: "Publishing is gated by the creator paywall. An active entitlement is required.",
-            code: "ENTITLEMENT_REQUIRED",
-          },
-          { status: 403 }
-        );
-      }
-
-      // Transition to PUBLISHED
+      // Transition to PUBLISHED without payment gating
       const updated = updateProposalStatus(db, id, authResult.auth.creator.id, "PUBLISHED");
       return NextResponse.json({
         success: true,

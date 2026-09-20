@@ -7,7 +7,6 @@ import {
   createProposal,
   findProposalById,
   findProposalsByCreatorId,
-  createOrUpdateEntitlement,
 } from "@/lib/db/repositories";
 import { hashPassword } from "@/lib/auth/password";
 import { createSession, SESSION_COOKIE_NAME } from "@/lib/auth/session";
@@ -287,50 +286,12 @@ describe("Milestone 3: Proposal Authoring & Management Integration", () => {
     });
   });
 
-  describe("Publishing & Paywall Gate (POST /api/proposals/[id]/publish)", () => {
-    it("blocks publishing with 403 when creator entitlement is INACTIVE", async () => {
-      // Default entitlement for creator1 was seeded as INACTIVE or not set (defaults to INACTIVE)
+  describe("Proposal Publishing (POST /api/proposals/[id]/publish)", () => {
+    it("allows authenticated creator to publish proposal directly without payment or paywall", async () => {
       const proposal = createProposal(dbModule.getDb(), {
         creatorId: creator1.id,
-        slug: "paywall-test-proposal",
-        title: "Paywall Proposal",
-        partnerName: "Sam",
-        themeId: "sunset-terrace",
-        storyContent: "{}",
-      });
-
-      const publishReq = new NextRequest(`http://localhost:3000/api/proposals/${proposal.id}/publish`, {
-        method: "POST",
-        headers: {
-          cookie: `${SESSION_COOKIE_NAME}=${sessionToken1}`,
-        },
-        body: JSON.stringify({ action: "publish" }),
-      });
-
-      const res = await publishProposalHandler(publishReq, {
-        params: Promise.resolve({ id: proposal.id }),
-      });
-      expect(res.status).toBe(403);
-      const json = await res.json();
-      expect(json.code).toBe("ENTITLEMENT_REQUIRED");
-      expect(json.error).toContain("Publishing is gated by the creator paywall");
-
-      // Verify status remains DRAFT
-      const stored = findProposalById(dbModule.getDb(), proposal.id);
-      expect(stored?.status).toBe("DRAFT");
-    });
-
-    it("allows publishing when creator entitlement is ACTIVE", async () => {
-      // Activate entitlement for creator1
-      createOrUpdateEntitlement(dbModule.getDb(), {
-        creatorId: creator1.id,
-        status: "ACTIVE",
-      });
-
-      const proposal = createProposal(dbModule.getDb(), {
-        creatorId: creator1.id,
-        slug: "active-publish-proposal",
-        title: "Active Entitlement Proposal",
+        slug: "direct-publish-proposal",
+        title: "Direct Proposal",
         partnerName: "Sam",
         themeId: "sunset-terrace",
         storyContent: "{}",
@@ -352,6 +313,10 @@ describe("Milestone 3: Proposal Authoring & Management Integration", () => {
       expect(json.success).toBe(true);
       expect(json.proposal.status).toBe("PUBLISHED");
       expect(json.proposal.published_at).not.toBeNull();
+
+      // Verify status in DB is PUBLISHED
+      const stored = findProposalById(dbModule.getDb(), proposal.id);
+      expect(stored?.status).toBe("PUBLISHED");
 
       // Now test unpublish
       const unpublishReq = new NextRequest(`http://localhost:3000/api/proposals/${proposal.id}/publish`, {
