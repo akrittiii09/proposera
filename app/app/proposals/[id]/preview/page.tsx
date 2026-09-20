@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireAuth } from "@/lib/auth/requireAuth";
@@ -22,12 +23,20 @@ export default async function ProposalPreviewPage({ params }: ProposalPreviewPag
     notFound();
   }
 
-  let storyContent: { question?: string; introMessage?: string; letterText?: string } = {};
+  let storyContent: {
+    question?: string;
+    introMessage?: string;
+    letterText?: string;
+    cover_media_id?: string | null;
+    mediaUrl?: string | null;
+  } = {};
   try {
     storyContent = JSON.parse(proposal.story_content);
   } catch {
     storyContent = {};
   }
+
+  const mediaSrc = storyContent.mediaUrl || (storyContent.cover_media_id ? `/api/media/${storyContent.cover_media_id}` : null);
 
   const themeClasses: Record<string, { bg: string; card: string; text: string; accent: string }> = {
     "midnight-velvet": {
@@ -106,8 +115,19 @@ export default async function ProposalPreviewPage({ params }: ProposalPreviewPag
               </h2>
             </div>
 
+            {/* Media Image */}
+            {mediaSrc && (
+              <div className="mt-4 overflow-hidden rounded-xl border border-white/10 shadow-lg">
+                <img
+                  src={mediaSrc}
+                  alt="Proposal highlight"
+                  className="h-44 w-full object-cover"
+                />
+              </div>
+            )}
+
             {/* Story Letter */}
-            <div className={`my-6 space-y-4 rounded-2xl border p-5 backdrop-blur-sm ${currentTheme.card}`}>
+            <div className={`my-4 space-y-4 rounded-2xl border p-5 backdrop-blur-sm ${currentTheme.card}`}>
               {storyContent.introMessage && (
                 <p className="text-xs italic leading-relaxed opacity-90">
                   &ldquo;{storyContent.introMessage}&rdquo;

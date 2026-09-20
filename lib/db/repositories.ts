@@ -54,6 +54,35 @@ export interface SessionRecord {
   expires_at: string;
 }
 
+export type MediaAssetStatus = "PENDING_SCAN" | "READY" | "QUARANTINED" | "DELETED";
+
+export interface MediaAssetRecord {
+  id: string;
+  creator_id: string;
+  proposal_id: string | null;
+  storage_key: string;
+  original_filename: string;
+  mime_type: string;
+  byte_size: number;
+  width: number | null;
+  height: number | null;
+  sha256_hash: string;
+  status: MediaAssetStatus;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface UploadPermitRecord {
+  id: string;
+  creator_id: string;
+  proposal_id: string;
+  max_byte_size: number;
+  allowed_mime_types: string;
+  expires_at: string;
+  used_at: string | null;
+  created_at: string;
+}
+
 // -----------------------------------------------------------------------------
 // Helper: Secure Random Slug Generator
 // -----------------------------------------------------------------------------
@@ -416,4 +445,195 @@ export function findResponsesByProposalId(
   `);
   const rows = stmt.all(proposalId) as unknown as ResponseRecord[];
   return rows ? rows.map((r) => ({ ...r })) : [];
+}
+
+// -----------------------------------------------------------------------------
+// Media & Upload Permits
+// -----------------------------------------------------------------------------
+export const DEFAULT_MAX_UPLOAD_BYTES = 8 * 1024 * 1024; // 8 MB per file
+export const DEFAULT_CREATOR_QUOTA_BYTES = 50 * 1024 * 1024; // 50 MB total cumulative cap per creator
+export const DEFAULT_PERMIT_EXPIRY_MINUTES = 15;
+export const DEFAULT_ALLOWED_MIME_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+];
+
+export interface CreateUploadPermitInput {
+  creatorId: string;
+  proposalId: string;
+  maxByteSize?: number;
+  allowedMimeTypes?: string[];
+  durationMinutes?: number;
+}
+
+export function createUploadPermit(
+  db: DatabaseSync,
+  data: CreateUploadPermitInput
+): UploadPermitRecord {
+  const id = crypto.randomUUID();
+  const now = new Date();
+  const durationMs = (data.durationMinutes ?? DEFAULT_PERMIT_EXPIRY_MINUTES) * 60 * 1000;
+  const expiresAt = new Date(now.getTime() + durationMs).toISOString();
+  const createdAt = now.toISOString();
+  const maxByteSize = data.maxByteSize ?? DEFAULT_MAX_UPLOAD_BYTES;
+  const allowedMimeTypes = JSON.stringify(data.allowedMimeTypes ?? DEFAULT_ALLOWED_MIME_TYPES);
+
+  const stmt = db.prepare(`
+    INSERT INTO upload_permits (
+      id, creator_id, proposal_id, max_byte_size, allowed_mime_types, expires_at, used_at, created_at
+    ) VALUES (?, ?, ?, ?, ?, ?, NULL, ?)
+  `);
+
+  stmt.run(id, data.creatorId, data.proposalId, maxByteSize, allowedMimeTypes, expiresAt, createdAt);
+
+  return {
+    id,
+    creator_id: data.creatorId,
+    proposal_id: data.proposalId,
+    max_byte_size: maxByteSize,
+    allowed_mime_types: allowedMimeTypes,
+    expires_at: expiresAt,
+    used_at: null,
+    created_at: createdAt,
+  };
+}
+
+export function findUploadPermitById(
+  db: DatabaseSync,
+  permitId: string
+): UploadPermitRecord | null {
+  const stmt = db.prepare(`SELECT * FROM upload_permits WHERE id = ?`);
+  const row = stmt.get(permitId) as unknown as UploadPermitRecord | undefined;
+  return row ? { ...row } : null;
+}
+
+export function markUploadPermitUsed(
+  db: DatabaseSync,
+  permitId: string
+): boolean {
+  const now = new Date().toISOString();
+  const stmt = db.prepare(`
+    UPDATE upload_permits
+    SET used_at = ?
+    WHERE id = ? AND used_at IS NULL
+  `);
+  const res = stmt.run(now, permitId);
+  return Number(res.changes) > 0;
+}
+
+export interface CreateMediaAssetInput {
+  id?: string;
+  creatorId: string;
+  proposalId?: string | null;
+  storageKey: string;
+  originalFilename: string;
+  mimeType: string;
+  byteSize: number;
+  width?: number | null;
+  height?: number | null;
+  sha256Hash: string;
+  status?: MediaAssetStatus;
+}
+
+export function createMediaAsset(
+  db: DatabaseSync,
+  data: CreateMediaAssetInput
+): MediaAssetRecord {
+  const id = data.id ?? crypto.randomUUID();
+  const now = new Date().toISOString();
+  const status: MediaAssetStatus = data.status ?? "READY";
+
+  const stmt = db.prepare(`
+    INSERT INTO media_assets (
+      id, creator_id, proposal_id, storage_key, original_filename,
+      mime_type, byte_size, width, height, sha256_hash, status, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+  `);
+
+  stmt.run(
+    id,
+    data.creatorId,
+    data.proposalId ?? null,
+    data.storageKey,
+    data.originalFilename,
+    data.mimeType,
+    data.byteSize,
+    data.width ?? null,
+    data.height ?? null,
+    data.sha256Hash,
+    status,
+    now,
+    now
+  );
+
+  return {
+    id,
+    creator_id: data.creatorId,
+    proposal_id: data.proposalId ?? null,
+    storage_key: data.storageKey,
+    original_filename: data.originalFilename,
+    mime_type: data.mimeType,
+    byte_size: data.byteSize,
+    width: data.width ?? null,
+    height: data.height ?? null,
+    sha256_hash: data.sha256Hash,
+    status,
+    created_at: now,
+    updated_at: now,
+  };
+}
+
+export function findMediaAssetById(
+  db: DatabaseSync,
+  id: string
+): MediaAssetRecord | null {
+  const stmt = db.prepare(`
+    SELECT * FROM media_assets
+    WHERE id = ? AND status != 'DELETED'
+  `);
+  const row = stmt.get(id) as unknown as MediaAssetRecord | undefined;
+  return row ? { ...row } : null;
+}
+
+export function findMediaAssetsByProposalId(
+  db: DatabaseSync,
+  proposalId: string
+): MediaAssetRecord[] {
+  const stmt = db.prepare(`
+    SELECT * FROM media_assets
+    WHERE proposal_id = ? AND status != 'DELETED'
+    ORDER BY created_at DESC
+  `);
+  const rows = stmt.all(proposalId) as unknown as MediaAssetRecord[];
+  return rows ? rows.map((r) => ({ ...r })) : [];
+}
+
+export function getCreatorStorageUsage(
+  db: DatabaseSync,
+  creatorId: string
+): number {
+  const stmt = db.prepare(`
+    SELECT COALESCE(SUM(byte_size), 0) AS total_bytes
+    FROM media_assets
+    WHERE creator_id = ? AND status != 'DELETED'
+  `);
+  const row = stmt.get(creatorId) as { total_bytes: number | bigint } | undefined;
+  return row ? Number(row.total_bytes) : 0;
+}
+
+export function deleteMediaAsset(
+  db: DatabaseSync,
+  id: string,
+  creatorId: string
+): boolean {
+  const now = new Date().toISOString();
+  const stmt = db.prepare(`
+    UPDATE media_assets
+    SET status = 'DELETED', updated_at = ?
+    WHERE id = ? AND creator_id = ?
+  `);
+  const res = stmt.run(now, id, creatorId);
+  return Number(res.changes) > 0;
 }

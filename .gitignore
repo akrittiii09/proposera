@@ -63,3 +63,8 @@ Thumbs.db
 .idea/
 *.swp
 *.swo
+
+# Local runtime data & test artifacts
+data/
+test-results/
+playwright-report/

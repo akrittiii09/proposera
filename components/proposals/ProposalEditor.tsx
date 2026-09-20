@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable @next/next/no-img-element */
 
 import { useState } from "react";
 import Link from "next/link";
@@ -15,7 +16,13 @@ export default function ProposalEditor({ proposal: initialProposal }: ProposalEd
   const [themeId, setThemeId] = useState(proposal.theme_id);
 
   // Story Content parsing
-  let initialStory: { question?: string; introMessage?: string; letterText?: string } = {};
+  let initialStory: {
+    question?: string;
+    introMessage?: string;
+    letterText?: string;
+    cover_media_id?: string | null;
+    mediaUrl?: string | null;
+  } = {};
   try {
     initialStory = JSON.parse(proposal.story_content);
   } catch {
@@ -29,10 +36,78 @@ export default function ProposalEditor({ proposal: initialProposal }: ProposalEd
   const [letterText, setLetterText] = useState(
     initialStory.letterText || "You are my best friend, my greatest adventure, and my forever love."
   );
+  const [coverMediaId, setCoverMediaId] = useState<string | null>(
+    initialStory.cover_media_id || null
+  );
+  const [mediaUrl, setMediaUrl] = useState<string | null>(initialStory.mediaUrl || null);
 
   const [saving, setSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [isUploadingMedia, setIsUploadingMedia] = useState(false);
+  const [mediaUploadError, setMediaUploadError] = useState<string | null>(null);
+
+  const handleMediaUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Reset input so re-selecting same file triggers onChange
+    e.target.value = "";
+
+    setMediaUploadError(null);
+    setIsUploadingMedia(true);
+
+    try {
+      // 1. Request upload permit
+      const permitRes = await fetch("/api/media/permit", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          proposalId: proposal.id,
+          fileSize: file.size,
+          mimeType: file.type || "image/jpeg",
+          filename: file.name,
+        }),
+      });
+
+      const permitData = await permitRes.json();
+      if (!permitRes.ok) {
+        setMediaUploadError(permitData.error || "Failed to obtain upload permit");
+        setIsUploadingMedia(false);
+        return;
+      }
+
+      // 2. Upload file binary with permit ID
+      const formData = new FormData();
+      formData.append("permitId", permitData.permitId);
+      formData.append("file", file);
+
+      const uploadRes = await fetch(permitData.uploadUrl || "/api/media/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const uploadData = await uploadRes.json();
+      if (!uploadRes.ok) {
+        setMediaUploadError(uploadData.error || "Failed to upload image");
+        setIsUploadingMedia(false);
+        return;
+      }
+
+      setCoverMediaId(uploadData.asset.id);
+      setMediaUrl(uploadData.asset.url);
+      setIsUploadingMedia(false);
+    } catch {
+      setMediaUploadError("Network error during photo upload");
+      setIsUploadingMedia(false);
+    }
+  };
+
+  const handleRemoveMedia = () => {
+    setCoverMediaId(null);
+    setMediaUrl(null);
+  };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,6 +120,8 @@ export default function ProposalEditor({ proposal: initialProposal }: ProposalEd
         question,
         introMessage,
         letterText,
+        cover_media_id: coverMediaId,
+        mediaUrl: mediaUrl || (coverMediaId ? `/api/media/${coverMediaId}` : null),
       };
 
       const res = await fetch(`/api/proposals/${proposal.id}`, {
@@ -263,6 +340,85 @@ export default function ProposalEditor({ proposal: initialProposal }: ProposalEd
                 placeholder="Will you marry me?"
               />
             </div>
+          </div>
+        </div>
+
+        {/* Media & Memories (Milestone 7 Pipeline) */}
+        <div className="rounded-xl border border-neutral-200 bg-white p-6 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-base font-semibold text-neutral-900 dark:text-white">
+                Story Photo &amp; Visuals
+              </h2>
+              <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+                Upload a romantic highlight photo (JPEG, PNG, WebP, GIF &le; 8 MB). All EXIF and GPS data are automatically stripped for privacy.
+              </p>
+            </div>
+            {coverMediaId && (
+              <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">
+                Photo Attached
+              </span>
+            )}
+          </div>
+
+          {mediaUploadError && (
+            <div
+              role="alert"
+              className="mt-4 rounded-lg bg-red-50 p-3 text-xs font-medium text-red-700 dark:bg-red-950/50 dark:text-red-300"
+            >
+              {mediaUploadError}
+            </div>
+          )}
+
+          <div className="mt-4">
+            {mediaUrl || coverMediaId ? (
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                <div className="relative aspect-video w-48 overflow-hidden rounded-xl border border-neutral-200 bg-neutral-100 shadow-sm dark:border-neutral-700 dark:bg-neutral-800">
+                  <img
+                    data-testid="media-upload-preview"
+                    src={mediaUrl || `/api/media/${coverMediaId}`}
+                    alt="Proposal cover highlight"
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <p className="text-xs text-neutral-600 dark:text-neutral-300">
+                    Optimized WebP ready. Remember to save changes to persist your update.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={handleRemoveMedia}
+                    className="rounded-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300"
+                  >
+                    Remove Photo
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <label
+                  htmlFor="media-file-input"
+                  className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-neutral-300 p-6 text-center hover:border-rose-400 dark:border-neutral-700 dark:hover:border-rose-500 cursor-pointer transition-colors"
+                >
+                  <span className="text-3xl mb-2">📸</span>
+                  <span className="text-xs font-semibold text-neutral-800 dark:text-neutral-200">
+                    {isUploadingMedia ? "Sanitizing & Processing Image..." : "Click or drag to upload a proposal photo"}
+                  </span>
+                  <span className="text-[11px] text-neutral-500 dark:text-neutral-400 mt-1">
+                    Max 8 MB per file &bull; Automatically converted to privacy-safe WebP
+                  </span>
+                  <input
+                    id="media-file-input"
+                    data-testid="media-upload-input"
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    disabled={isUploadingMedia}
+                    onChange={handleMediaUpload}
+                    className="sr-only"
+                  />
+                </label>
+              </div>
+            )}
           </div>
         </div>
 

@@ -105,3 +105,27 @@ export type CreateResponseInput = z.infer<typeof CreateResponseSchema>;
 
 export const SubmitResponseSchema = CreateResponseSchema;
 export type SubmitResponseInput = CreateResponseInput;
+
+/**
+ * Media Upload Permit Schema (Milestone 7 Media Ingestion Pipeline).
+ */
+export const RequestUploadPermitSchema = z.object({
+  proposalId: z.string().trim().min(1, "Proposal ID is required"),
+  fileSize: z
+    .number()
+    .int("File size must be an integer")
+    .positive("File size must be greater than 0")
+    .max(8 * 1024 * 1024, "File size exceeds the 8 MB maximum limit"),
+  mimeType: z
+    .string()
+    .trim()
+    .refine(
+      (val) => ["image/jpeg", "image/png", "image/webp", "image/gif"].includes(val),
+      {
+        message: "Unsupported MIME type. Allowed types: image/jpeg, image/png, image/webp, image/gif",
+      }
+    ),
+  filename: z.string().trim().max(255).optional(),
+});
+
+export type RequestUploadPermitInput = z.infer<typeof RequestUploadPermitSchema>;

@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable @next/next/no-img-element */
 
 import { useState, useEffect } from "react";
 import { PublicProposalProjection } from "@/lib/db/repositories";
@@ -29,6 +30,8 @@ export default function SceneOrchestrator({
     letterText?: string;
     opening_headline?: string;
     opening_letter?: string;
+    cover_media_id?: string | null;
+    mediaUrl?: string | null;
   };
 
   const partnerName = proposal.partner_name || "My Love";
@@ -41,6 +44,9 @@ export default function SceneOrchestrator({
     story.opening_letter ||
     "From the moment we met, my world became brighter and fuller. You are my best friend, my constant home, and my greatest adventure. I want to spend all my tomorrows with you.";
   const questionText = story.question || "Will you marry me?";
+  const mediaSrc =
+    story.mediaUrl ||
+    (story.cover_media_id ? `/api/media/${story.cover_media_id}` : null);
 
   // Reduced motion preference detection
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
@@ -168,6 +174,17 @@ export default function SceneOrchestrator({
                 {partnerName}
               </h1>
             </div>
+
+            {mediaSrc && (
+              <div className="w-full max-w-xs aspect-video rounded-2xl overflow-hidden shadow-2xl border border-white/10 relative my-2">
+                <img
+                  src={mediaSrc}
+                  alt="Romantic memory"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
+
             <p className={`text-sm sm:text-base leading-relaxed max-w-xs italic ${currentTheme.textSecondary}`}>
               &ldquo;{introText}&rdquo;
             </p>
