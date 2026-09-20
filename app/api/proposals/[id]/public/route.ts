@@ -38,7 +38,7 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
     );
   }
 
-  // Filter into sanitized public projection (no creator_id, email, billing, internal dates)
+  // Filter into sanitized public projection (no creator_id, email, internal dates)
   const projection = getPublicProjection(proposal);
 
   return NextResponse.json(

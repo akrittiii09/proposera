@@ -217,7 +217,7 @@ To prevent data leaks, the server **never** delivers the raw `Proposal` or `Crea
                     │ email (PRIVATE)              │
                     │ status (PRIVATE)             │
                     │ internal notes (PRIVATE)     │
-                    │ billing/quota (PRIVATE)      │
+                    │ account/quota (PRIVATE)      │
                     │ story content                │
                     │ media URLs                   │
                     │ theme selection              │
