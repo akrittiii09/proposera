@@ -97,13 +97,13 @@ export function createCreator(
 export function findCreatorById(db: DatabaseSync, id: string): CreatorRecord | null {
   const stmt = db.prepare("SELECT * FROM creators WHERE id = ?");
   const row = stmt.get(id) as unknown as CreatorRecord | undefined;
-  return row || null;
+  return row ? { ...row } : null;
 }
 
 export function findCreatorByEmail(db: DatabaseSync, email: string): CreatorRecord | null {
   const stmt = db.prepare("SELECT * FROM creators WHERE email = ? COLLATE NOCASE");
   const row = stmt.get(email.toLowerCase().trim()) as unknown as CreatorRecord | undefined;
-  return row || null;
+  return row ? { ...row } : null;
 }
 
 export function updateCreatorPassword(
@@ -187,7 +187,7 @@ export function createProposal(
 export function findProposalById(db: DatabaseSync, id: string): ProposalRecord | null {
   const stmt = db.prepare("SELECT * FROM proposals WHERE id = ?");
   const row = stmt.get(id) as unknown as ProposalRecord | undefined;
-  return row || null;
+  return row ? { ...row } : null;
 }
 
 export function findProposalsByCreatorId(db: DatabaseSync, creatorId: string): ProposalRecord[] {
@@ -196,19 +196,20 @@ export function findProposalsByCreatorId(db: DatabaseSync, creatorId: string): P
     WHERE creator_id = ? AND status != 'DELETED'
     ORDER BY created_at DESC, rowid DESC
   `);
-  return (stmt.all(creatorId) as unknown as ProposalRecord[]) || [];
+  const rows = stmt.all(creatorId) as unknown as ProposalRecord[];
+  return rows ? rows.map((r) => ({ ...r })) : [];
 }
 
 export function findProposalBySlug(db: DatabaseSync, slug: string): ProposalRecord | null {
   const stmt = db.prepare("SELECT * FROM proposals WHERE slug = ?");
   const row = stmt.get(slug) as unknown as ProposalRecord | undefined;
-  return row || null;
+  return row ? { ...row } : null;
 }
 
 export function findPublishedProposalBySlug(db: DatabaseSync, slug: string): ProposalRecord | null {
   const stmt = db.prepare("SELECT * FROM proposals WHERE slug = ? AND status = 'PUBLISHED'");
   const row = stmt.get(slug) as unknown as ProposalRecord | undefined;
-  return row || null;
+  return row ? { ...row } : null;
 }
 
 /**
@@ -390,8 +391,8 @@ export function findLatestResponseByProposalId(
     ORDER BY created_at DESC
     LIMIT 1
   `);
-  const row = stmt.get(proposalId);
-  return (row as unknown as ResponseRecord) || null;
+  const row = stmt.get(proposalId) as unknown as ResponseRecord | undefined;
+  return row ? { ...row } : null;
 }
 
 /**
@@ -413,5 +414,6 @@ export function findResponsesByProposalId(
     WHERE proposal_id = ?
     ORDER BY created_at DESC
   `);
-  return (stmt.all(proposalId) as unknown as ResponseRecord[]) || [];
+  const rows = stmt.all(proposalId) as unknown as ResponseRecord[];
+  return rows ? rows.map((r) => ({ ...r })) : [];
 }

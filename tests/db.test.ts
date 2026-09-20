@@ -17,6 +17,7 @@ import {
   deleteProposal,
   createResponse,
   findResponsesByProposalId,
+  findLatestResponseByProposalId,
 } from "@/lib/db/repositories";
 
 describe("Database Foundation & Repositories", () => {
@@ -273,6 +274,45 @@ describe("Database Foundation & Repositories", () => {
       // Other creator attempts to retrieve responses -> rejected (returns null)
       const unauthorizedResponses = findResponsesByProposalId(db, proposal.id, otherCreator.id);
       expect(unauthorizedResponses).toBeNull();
+    });
+  });
+
+  describe("React Server Component Serialization Invariance", () => {
+    it("ensures all repository queries return plain objects with Object.prototype", () => {
+      const creator = createCreator(db, { email: "plain@test.com", passwordHash: "hash" });
+      const proposal = createProposal(db, {
+        creatorId: creator.id,
+        title: "Plain Test",
+        partnerName: "Taylor",
+        slug: "plain-test-slug",
+      });
+      createResponse(db, {
+        proposalId: proposal.id,
+        choice: "YES",
+      });
+
+      const creatorById = findCreatorById(db, creator.id);
+      expect(Object.getPrototypeOf(creatorById)).toBe(Object.prototype);
+
+      const creatorByEmail = findCreatorByEmail(db, "plain@test.com");
+      expect(Object.getPrototypeOf(creatorByEmail)).toBe(Object.prototype);
+
+      const propById = findProposalById(db, proposal.id);
+      expect(Object.getPrototypeOf(propById)).toBe(Object.prototype);
+
+      const propList = findProposalsByCreatorId(db, creator.id);
+      expect(propList.length).toBeGreaterThan(0);
+      expect(Object.getPrototypeOf(propList[0])).toBe(Object.prototype);
+
+      const propBySlug = findProposalBySlug(db, "plain-test-slug");
+      expect(Object.getPrototypeOf(propBySlug)).toBe(Object.prototype);
+
+      const responses = findResponsesByProposalId(db, proposal.id, creator.id);
+      expect(responses).not.toBeNull();
+      expect(Object.getPrototypeOf(responses![0])).toBe(Object.prototype);
+
+      const latestResp = findLatestResponseByProposalId(db, proposal.id);
+      expect(Object.getPrototypeOf(latestResp)).toBe(Object.prototype);
     });
   });
 });

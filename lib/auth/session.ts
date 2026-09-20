@@ -65,7 +65,7 @@ export function validateSession(
     return null;
   }
 
-  return { session, creator };
+  return { session: { ...session }, creator };
 }
 
 /**
