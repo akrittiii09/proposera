@@ -33,7 +33,6 @@ COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/lib ./lib
 
-VOLUME ["/app/data"]
 
 EXPOSE 3000
 
