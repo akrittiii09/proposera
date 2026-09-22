@@ -417,7 +417,7 @@ export function findLatestResponseByProposalId(
   const stmt = db.prepare(`
     SELECT * FROM responses
     WHERE proposal_id = ?
-    ORDER BY created_at DESC
+    ORDER BY created_at DESC, rowid DESC
     LIMIT 1
   `);
   const row = stmt.get(proposalId) as unknown as ResponseRecord | undefined;
@@ -441,7 +441,7 @@ export function findResponsesByProposalId(
   const stmt = db.prepare(`
     SELECT * FROM responses
     WHERE proposal_id = ?
-    ORDER BY created_at DESC
+    ORDER BY created_at DESC, rowid DESC
   `);
   const rows = stmt.all(proposalId) as unknown as ResponseRecord[];
   return rows ? rows.map((r) => ({ ...r })) : [];

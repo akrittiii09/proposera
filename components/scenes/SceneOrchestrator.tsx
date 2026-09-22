@@ -3,6 +3,8 @@
 
 import { useState, useEffect } from "react";
 import { PublicProposalProjection } from "@/lib/db/repositories";
+import { useAmbientAudio } from "@/components/audio/useAmbientAudio";
+import AmbientAudioControl from "@/components/audio/AmbientAudioControl";
 
 export interface SceneOrchestratorProps {
   proposal: PublicProposalProjection;
@@ -59,6 +61,24 @@ export default function SceneOrchestrator({
       return () => mediaQuery.removeEventListener("change", listener);
     }
   }, []);
+
+  // Ambient audio engine
+  const audioTrackId =
+    ((story as { audio_track_id?: string | null })?.audio_track_id as string | null) ||
+    ((proposal.custom_theme_overrides as { audio_track_id?: string | null })?.audio_track_id as string | null) ||
+    null;
+
+  const audio = useAmbientAudio({
+    proposalSlug: proposal.slug,
+    trackId: audioTrackId,
+    enabled: true,
+  });
+
+  const handleBeginStory = () => {
+    // Graceful activation on first explicit physical user interaction
+    audio.activateAudio().catch(() => {});
+    setCurrentScene(2);
+  };
 
   // Theme visual styling tokens
   const themeMap: Record<
@@ -147,10 +167,16 @@ export default function SceneOrchestrator({
       className={`min-h-screen w-full flex flex-col justify-between items-center px-4 py-8 sm:py-12 transition-colors duration-700 ${currentTheme.bg} ${currentTheme.textPrimary}`}
       style={{ minHeight: "100dvh" }}
     >
-      {/* Top Subtle Brand Watermark */}
-      <header className="w-full max-w-md flex justify-between items-center text-xs opacity-40 font-mono tracking-widest uppercase mb-4">
-        <span>Proposera</span>
-        <span>Scene {currentScene} of 5</span>
+      {/* Top Subtle Brand Watermark & Ambient Audio Controls */}
+      <header className="w-full max-w-md flex justify-between items-center text-xs font-mono tracking-widest uppercase mb-4 z-20">
+        <span className="opacity-40">Proposera</span>
+        <div className="flex items-center space-x-2">
+          <AmbientAudioControl
+            audio={audio}
+            prefersReducedMotion={prefersReducedMotion}
+          />
+          <span className="opacity-40">Scene {currentScene} of 5</span>
+        </div>
       </header>
 
       {/* Main Experiential Canvas (Mobile-First 360px - 430px optimized) */}
@@ -192,7 +218,7 @@ export default function SceneOrchestrator({
             <div className="pt-6 w-full">
               <button
                 type="button"
-                onClick={() => setCurrentScene(2)}
+                onClick={handleBeginStory}
                 className={`w-full min-h-[48px] px-6 py-3.5 rounded-full font-semibold text-sm tracking-wide shadow-lg transition-transform active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 ${currentTheme.btnPrimary}`}
               >
                 Begin Our Story &rarr;
@@ -404,6 +430,9 @@ export default function SceneOrchestrator({
       {/* Persistent Audio / Pacing Status Footer */}
       <footer className="w-full max-w-md text-center text-[10px] opacity-40 font-sans tracking-wide pt-4">
         {isInteractive ? "Intimate Proposal Experience" : "Creator Studio Sandbox Preview"}
+        {audio.status === "playing" && !audio.isMuted && (
+          <span className="ml-2">• 🎵 {audio.track.title}</span>
+        )}
       </footer>
     </div>
   );
