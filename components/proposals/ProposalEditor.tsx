@@ -198,8 +198,18 @@ export default function ProposalEditor({ proposal: initialProposal }: ProposalEd
 
       {/* Live Mutable Notice Banner */}
       {proposal.status === "PUBLISHED" && (
-        <div className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-xs text-emerald-900 dark:border-emerald-900/40 dark:bg-emerald-950/40 dark:text-emerald-200">
-          <span className="font-bold">Live Mutable Publishing Active:</span> This proposal is currently live. Any changes saved below update the published experience immediately on the public URL without creating version snapshots.
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-xs text-emerald-900 dark:border-emerald-900/40 dark:bg-emerald-950/40 dark:text-emerald-200">
+          <div>
+            <span className="font-bold">Live Mutable Publishing Active:</span> This proposal is currently live. Any changes saved below update the published experience immediately on the public URL without creating version snapshots.
+          </div>
+          <a
+            href={`/p/${proposal.slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex shrink-0 items-center gap-1 font-semibold text-emerald-700 underline hover:text-emerald-900 dark:text-emerald-300 dark:hover:text-emerald-100"
+          >
+            Open Live ↗
+          </a>
         </div>
       )}
 

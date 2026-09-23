@@ -133,9 +133,21 @@ export default async function ProposalsDashboardPage() {
                       {proposal.partner_name}
                     </span>
                   </p>
-                  <p className="mt-1 text-xs text-neutral-400 font-mono">
-                    /p/{proposal.slug}
-                  </p>
+                  {proposal.status === "PUBLISHED" ? (
+                    <a
+                      href={`/p/${proposal.slug}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="mt-1 inline-flex items-center gap-1 font-mono text-xs text-rose-600 hover:underline dark:text-rose-400"
+                      title="Open live proposal"
+                    >
+                      /p/{proposal.slug} ↗
+                    </a>
+                  ) : (
+                    <p className="mt-1 text-xs text-neutral-400 font-mono">
+                      /p/{proposal.slug}
+                    </p>
+                  )}
                 </div>
 
                 <div className="mt-4 flex items-center justify-between border-t border-neutral-100 pt-3 dark:border-neutral-800">
@@ -144,6 +156,17 @@ export default async function ProposalsDashboardPage() {
                   </div>
 
                   <div className="flex items-center space-x-2">
+                    {proposal.status === "PUBLISHED" && (
+                      <a
+                        href={`/p/${proposal.slug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="rounded border border-emerald-200 bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 dark:hover:bg-emerald-900/60"
+                        title="View live proposal in new tab"
+                      >
+                        Live ↗
+                      </a>
+                    )}
                     <Link
                       href={`/app/proposals/${proposal.id}`}
                       className="rounded border border-neutral-200 px-2.5 py-1 text-xs font-medium text-neutral-700 hover:bg-neutral-50 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"

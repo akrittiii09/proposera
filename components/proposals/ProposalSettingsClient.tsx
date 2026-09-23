@@ -36,6 +36,20 @@ export default function ProposalSettingsClient({
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyLink = async () => {
+    try {
+      const origin = typeof window !== "undefined" ? window.location.origin : "";
+      const fullUrl = `${origin}/p/${proposal.slug}`;
+      await navigator.clipboard.writeText(fullUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch {
+      // Fallback
+    }
+  };
+
   const handleUpdateSlug = async (e: React.FormEvent) => {
     e.preventDefault();
     setSlugSaving(true);
@@ -200,6 +214,21 @@ export default function ProposalSettingsClient({
               </button>
             </div>
           </form>
+
+          {proposal.status === "PUBLISHED" && (
+            <div className="mt-3 flex items-center justify-between rounded-lg bg-neutral-50 px-3 py-2 text-xs dark:bg-neutral-800/50">
+              <span className="font-mono text-neutral-600 dark:text-neutral-400 truncate">
+                /p/{proposal.slug}
+              </span>
+              <button
+                type="button"
+                onClick={handleCopyLink}
+                className="ml-2 shrink-0 font-medium text-rose-600 hover:text-rose-700 dark:text-rose-400"
+              >
+                {copied ? "✓ Copied!" : "Copy Link"}
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Publication Management */}
@@ -253,14 +282,31 @@ export default function ProposalSettingsClient({
                 {publishing ? "Processing..." : "Publish Proposal"}
               </button>
             ) : (
-              <button
-                type="button"
-                onClick={() => handlePublishToggle("unpublish")}
-                disabled={publishing}
-                className="rounded-lg border border-neutral-300 bg-white px-5 py-2 text-xs font-semibold text-neutral-700 shadow-sm hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200 disabled:opacity-50"
-              >
-                {publishing ? "Processing..." : "Unpublish (Make Private Draft)"}
-              </button>
+              <>
+                <a
+                  href={`/p/${proposal.slug}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="rounded-lg bg-emerald-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                >
+                  Open Live Proposal ↗
+                </a>
+                <button
+                  type="button"
+                  onClick={handleCopyLink}
+                  className="rounded-lg border border-neutral-300 bg-white px-4 py-2 text-xs font-semibold text-neutral-700 shadow-sm hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200"
+                >
+                  {copied ? "✓ Copied to Clipboard!" : "Copy Live Link"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handlePublishToggle("unpublish")}
+                  disabled={publishing}
+                  className="rounded-lg border border-neutral-300 bg-white px-5 py-2 text-xs font-semibold text-neutral-700 shadow-sm hover:bg-neutral-50 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-200 disabled:opacity-50"
+                >
+                  {publishing ? "Processing..." : "Unpublish (Make Private Draft)"}
+                </button>
+              </>
             )}
           </div>
         </div>
