@@ -15,12 +15,12 @@ import { RequestUploadPermitSchema } from "@/lib/validation/schemas";
  * Enforces creator proposal ownership and cumulative 50 MB storage quota.
  */
 export async function POST(request: NextRequest) {
-  const authResult = await requireApiAuth(request);
-  if (!authResult.authenticated) {
-    return authResult.response;
-  }
-
   try {
+    const authResult = await requireApiAuth(request);
+    if (!authResult.authenticated) {
+      return authResult.response;
+    }
+
     const body = await request.json();
     const parseResult = RequestUploadPermitSchema.safeParse(body);
 
@@ -74,9 +74,9 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Internal server error issuing upload permit";
+    console.error("Media permit issuance error:", err);
     return NextResponse.json(
-      { error: message },
+      { error: "Internal server error issuing upload permit" },
       { status: 500 }
     );
   }

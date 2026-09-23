@@ -20,25 +20,24 @@ import { saveProcessedMedia } from "@/lib/media/storage";
  * Requires a valid, single-use, non-expired permit.
  */
 export async function POST(request: NextRequest) {
-  const authResult = await requireApiAuth(request);
-  if (!authResult.authenticated) {
-    return authResult.response;
-  }
-
-  const creatorId = authResult.auth.creator.id;
-  const db = getDb();
-
-  let formData: FormData;
   try {
-    formData = await request.formData();
-  } catch {
-    return NextResponse.json(
-      { error: "Invalid form data: Failed to parse multipart body" },
-      { status: 400 }
-    );
-  }
+    const authResult = await requireApiAuth(request);
+    if (!authResult.authenticated) {
+      return authResult.response;
+    }
 
-  try {
+    const creatorId = authResult.auth.creator.id;
+    const db = getDb();
+
+    let formData: FormData;
+    try {
+      formData = await request.formData();
+    } catch {
+      return NextResponse.json(
+        { error: "Invalid form data: Failed to parse multipart body" },
+        { status: 400 }
+      );
+    }
     const permitId =
       (formData.get("permitId") as string | null) ||
       request.headers.get("x-permit-id");
@@ -201,9 +200,9 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : "Internal server error during media upload";
+    console.error("Media upload processing error:", err);
     return NextResponse.json(
-      { error: message },
+      { error: "Internal server error during media upload" },
       { status: 500 }
     );
   }
