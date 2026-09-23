@@ -3,17 +3,19 @@
 Proposera is being developed as a standalone, data-driven personalized proposal-experience platform.
 
 ## Current Development Status
-- **Status**: Milestones 1 through 8 Complete
-- **Completed Milestones**:
-  - Milestone 1: Foundation, Tooling & Environment Setup
-  - Milestone 2: Creator Authentication & Server Sessions
-  - Milestone 3: Proposal Authoring & Management
-  - Milestone 4: Recipient Delivery & Response Capture (`/p/[slug]`)
-  - Milestone 5: Live Mutable Publishing
-  - Milestone 6: Free Publishing / Paywall Removal
-  - Milestone 7: Media Upload Ingestion Pipeline & Storage Partitioning
-  - Milestone 8: Ambient Music Engine & Autoplay Handler
-- **Next Milestone**: Milestone 9 — Playful Micro-Interactions (Scratch/Flip reveals) & Enhanced Storytelling
+- **Status**: Core MVP Production Hardened & Deployed
+- **Production URL**: [https://proposera-production.up.railway.app](https://proposera-production.up.railway.app)
+- **Deployment Platform**: Railway (Docker container with persistent `/app/data` volume for SQLite & media assets)
+- **Completed Capabilities**:
+  - Creator Authentication & Session Management
+  - Proposal Authoring & Management Studio
+  - Recipient Delivery & Interactive Response Capture (`/p/[slug]`)
+  - Live Mutable Publishing (Instant edits reflected on live URL)
+  - Free Publishing (No paywall / Razorpay removed)
+  - Privacy-preserving Media Ingestion Pipeline (EXIF stripping, WebP conversion, storage quotas)
+  - Ambient Proposal Music Engine (Web Audio API with graceful autoplay fallback and mute control)
+  - Full Ownership Isolation & Non-Disclosure Security Guards
+
 
 ## Project Purpose
 Proposera enables creators to author, customize, preview, and share intimate, beautifully orchestrated proposal experiences for their partners. It separates content from presentation so visual themes can be evolved without risking narrative loss.
