@@ -1,7 +1,7 @@
 "use client";
 /* eslint-disable @next/next/no-img-element */
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { PublicProposalProjection } from "@/lib/db/repositories";
 import { useAmbientAudio } from "@/components/audio/useAmbientAudio";
 import AmbientAudioControl from "@/components/audio/AmbientAudioControl";
@@ -24,6 +24,33 @@ export default function SceneOrchestrator({
     choice: string;
     customNote?: string | null;
   } | null>(null);
+  const [mediaFailed, setMediaFailed] = useState(false);
+  const sceneContainerRef = useRef<HTMLDivElement>(null);
+
+  // Restore previously submitted response from session if recipient reloads after answering
+  useEffect(() => {
+    if (typeof window !== "undefined" && isInteractive) {
+      try {
+        const saved = sessionStorage.getItem(`proposera_response_${proposal.slug}`);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed?.choice) {
+            setSubmittedResponse(parsed);
+            setCurrentScene(5);
+          }
+        }
+      } catch {
+        // Ignore storage access errors
+      }
+    }
+  }, [proposal.slug, isInteractive]);
+
+  // Focus management: move focus to scene container on every transition for keyboard/screen readers
+  useEffect(() => {
+    if (sceneContainerRef.current) {
+      sceneContainerRef.current.focus();
+    }
+  }, [currentScene]);
 
   // Parse story content safely
   const story = proposal.story_content as {
@@ -133,6 +160,8 @@ export default function SceneOrchestrator({
       return;
     }
 
+    if (isSubmitting) return;
+
     setIsSubmitting(true);
     setSubmitError(null);
 
@@ -151,7 +180,18 @@ export default function SceneOrchestrator({
         throw new Error(errorData.error || "Failed to submit response. Please try again.");
       }
 
-      setSubmittedResponse({ choice, customNote });
+      const responsePayload = { choice, customNote: customNote.trim() || undefined };
+      setSubmittedResponse(responsePayload);
+      if (typeof window !== "undefined") {
+        try {
+          sessionStorage.setItem(
+            `proposera_response_${proposal.slug}`,
+            JSON.stringify(responsePayload)
+          );
+        } catch {
+          // Ignore storage write issues
+        }
+      }
       setIsSubmitting(false);
       // Advance to Scene 5: Celebration
       setCurrentScene(5);
@@ -164,7 +204,7 @@ export default function SceneOrchestrator({
 
   return (
     <div
-      className={`min-h-screen w-full flex flex-col justify-between items-center px-4 py-8 sm:py-12 transition-colors duration-700 ${currentTheme.bg} ${currentTheme.textPrimary}`}
+      className={`min-h-screen w-full overflow-x-hidden flex flex-col justify-between items-center px-4 py-8 sm:py-12 transition-colors duration-700 ${currentTheme.bg} ${currentTheme.textPrimary}`}
       style={{ minHeight: "100dvh" }}
     >
       {/* Top Subtle Brand Watermark & Ambient Audio Controls */}
@@ -180,7 +220,11 @@ export default function SceneOrchestrator({
       </header>
 
       {/* Main Experiential Canvas (Mobile-First 360px - 430px optimized) */}
-      <main className="w-full max-w-md flex-1 flex flex-col justify-center my-auto">
+      <main
+        ref={sceneContainerRef}
+        tabIndex={-1}
+        className="w-full max-w-md flex-1 flex flex-col justify-center my-auto outline-none"
+      >
         {/* ======================================================== */}
         {/* SCENE 1: Introduction / Opening                          */}
         {/* ======================================================== */}
@@ -201,12 +245,13 @@ export default function SceneOrchestrator({
               </h1>
             </div>
 
-            {mediaSrc && (
+            {mediaSrc && !mediaFailed && (
               <div className="w-full max-w-xs aspect-video rounded-2xl overflow-hidden shadow-2xl border border-white/10 relative my-2">
                 <img
                   src={mediaSrc}
                   alt="Romantic memory"
                   className="w-full h-full object-cover"
+                  onError={() => setMediaFailed(true)}
                 />
               </div>
             )}
@@ -219,7 +264,7 @@ export default function SceneOrchestrator({
               <button
                 type="button"
                 onClick={handleBeginStory}
-                className={`w-full min-h-[48px] px-6 py-3.5 rounded-full font-semibold text-sm tracking-wide shadow-lg transition-transform active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 ${currentTheme.btnPrimary}`}
+                className={`w-full min-h-[48px] px-6 py-3.5 rounded-full font-semibold text-sm tracking-wide shadow-lg transition-transform active:scale-95 focus:outline-none focus:ring-2 focus:ring-rose-400 focus:ring-offset-2 focus:ring-offset-slate-950 ${currentTheme.btnPrimary}`}
               >
                 Begin Our Story &rarr;
               </button>
@@ -245,7 +290,7 @@ export default function SceneOrchestrator({
             </div>
 
             <div
-              className={`rounded-2xl border p-6 shadow-xl backdrop-blur-sm ${currentTheme.cardBg}`}
+              className={`rounded-2xl border p-6 shadow-xl backdrop-blur-sm max-h-[60vh] overflow-y-auto break-words ${currentTheme.cardBg}`}
             >
               <p className="whitespace-pre-wrap text-sm sm:text-base leading-relaxed font-sans">
                 {letterText}
@@ -256,14 +301,14 @@ export default function SceneOrchestrator({
               <button
                 type="button"
                 onClick={() => setCurrentScene(1)}
-                className={`min-h-[48px] px-4 py-3 rounded-full text-xs font-medium border transition-colors ${currentTheme.btnSecondary}`}
+                className={`min-h-[48px] px-4 py-3 rounded-full text-xs font-medium border transition-colors focus:outline-none focus:ring-2 focus:ring-rose-400 focus:ring-offset-2 focus:ring-offset-slate-950 ${currentTheme.btnSecondary}`}
               >
                 &larr; Back
               </button>
               <button
                 type="button"
                 onClick={() => setCurrentScene(3)}
-                className={`flex-1 min-h-[48px] px-6 py-3.5 rounded-full font-semibold text-sm shadow-lg transition-transform active:scale-95 ${currentTheme.btnPrimary}`}
+                className={`flex-1 min-h-[48px] px-6 py-3.5 rounded-full font-semibold text-sm shadow-lg transition-transform active:scale-95 focus:outline-none focus:ring-2 focus:ring-rose-400 focus:ring-offset-2 focus:ring-offset-slate-950 ${currentTheme.btnPrimary}`}
               >
                 Continue &rarr;
               </button>
@@ -296,14 +341,14 @@ export default function SceneOrchestrator({
               <button
                 type="button"
                 onClick={() => setCurrentScene(4)}
-                className={`w-full min-h-[52px] px-6 py-4 rounded-full font-bold text-base shadow-2xl tracking-wide transition-all transform hover:scale-105 active:scale-95 ${currentTheme.btnPrimary}`}
+                className={`w-full min-h-[52px] px-6 py-4 rounded-full font-bold text-base shadow-2xl tracking-wide transition-all transform hover:scale-105 active:scale-95 focus:outline-none focus:ring-2 focus:ring-rose-400 focus:ring-offset-2 focus:ring-offset-slate-950 ${currentTheme.btnPrimary}`}
               >
                 Give My Answer 💖
               </button>
               <button
                 type="button"
                 onClick={() => setCurrentScene(2)}
-                className={`w-full min-h-[48px] py-2 text-xs font-medium opacity-60 hover:opacity-100 transition-opacity ${currentTheme.textSecondary}`}
+                className={`w-full min-h-[48px] py-2 text-xs font-medium opacity-60 hover:opacity-100 transition-opacity focus:outline-none focus:ring-2 focus:ring-rose-400 rounded-lg ${currentTheme.textSecondary}`}
               >
                 &larr; Read Letter Again
               </button>
@@ -343,7 +388,7 @@ export default function SceneOrchestrator({
                 htmlFor="customNote"
                 className="block text-xs font-medium mb-1.5 opacity-80"
               >
-                Add an optional heartfelt note for {proposal.title ? "them" : "your partner"}:
+                Add an optional heartfelt note:
               </label>
               <textarea
                 id="customNote"
@@ -366,7 +411,7 @@ export default function SceneOrchestrator({
                 type="button"
                 disabled={isSubmitting}
                 onClick={() => handleResponseSubmit("YES_ALWAYS_AND_FOREVER")}
-                className={`w-full min-h-[52px] rounded-full font-bold text-sm sm:text-base tracking-wide shadow-xl transition-all transform active:scale-95 disabled:opacity-50 ${currentTheme.btnPrimary}`}
+                className={`w-full min-h-[52px] rounded-full font-bold text-sm sm:text-base tracking-wide shadow-xl transition-all transform active:scale-95 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-rose-400 focus:ring-offset-2 focus:ring-offset-slate-950 ${currentTheme.btnPrimary}`}
               >
                 {isSubmitting ? "Sealing Your Answer..." : "YES, ALWAYS & FOREVER 💍"}
               </button>
@@ -375,7 +420,7 @@ export default function SceneOrchestrator({
                 type="button"
                 disabled={isSubmitting}
                 onClick={() => setCurrentScene(3)}
-                className={`w-full min-h-[48px] rounded-full text-xs font-medium border transition-colors ${currentTheme.btnSecondary}`}
+                className={`w-full min-h-[48px] rounded-full text-xs font-medium border transition-colors focus:outline-none focus:ring-2 focus:ring-rose-400 focus:ring-offset-2 focus:ring-offset-slate-950 ${currentTheme.btnSecondary}`}
               >
                 &larr; Back to Question
               </button>
@@ -389,6 +434,8 @@ export default function SceneOrchestrator({
         {currentScene === 5 && (
           <div
             data-testid="scene-5"
+            role="status"
+            aria-live="polite"
             className="flex flex-col items-center text-center space-y-6 animate-fadeIn py-8"
           >
             {/* Visual celebration effects (particle simulation or accessible static typography) */}
@@ -420,7 +467,17 @@ export default function SceneOrchestrator({
               </div>
             )}
 
-            <div className="pt-8 text-xs font-mono opacity-50">
+            <div className="pt-4">
+              <button
+                type="button"
+                onClick={() => setCurrentScene(1)}
+                className={`min-h-[44px] px-5 py-2.5 rounded-full text-xs font-medium border transition-colors opacity-80 hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-rose-400 focus:ring-offset-2 focus:ring-offset-slate-950 ${currentTheme.btnSecondary}`}
+              >
+                Replay Story ↺
+              </button>
+            </div>
+
+            <div className="pt-4 text-xs font-mono opacity-50">
               💍 Proposera &bull; Sealed with love
             </div>
           </div>
