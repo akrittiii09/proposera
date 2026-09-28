@@ -1,9 +1,7 @@
 import Link from "next/link";
 import { requireAuth } from "@/lib/auth/requireAuth";
 import { getDb } from "@/lib/db";
-import {
-  findProposalsByCreatorId,
-} from "@/lib/db/repositories";
+import { findProposalsByCreatorId } from "@/lib/db/repositories";
 import LogoutButton from "@/components/auth/LogoutButton";
 
 export const metadata = {
@@ -21,26 +19,29 @@ export default async function ProposalsDashboardPage() {
     switch (status) {
       case "PUBLISHED":
         return (
-          <span className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300">
+          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700 border border-emerald-200">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
             Published (Live)
           </span>
         );
       case "UNPUBLISHED":
         return (
-          <span className="inline-flex items-center rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700 dark:bg-amber-950/60 dark:text-amber-300">
+          <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-semibold text-amber-700 border border-amber-200">
+            <span className="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
             Unpublished
           </span>
         );
       case "ARCHIVED":
         return (
-          <span className="inline-flex items-center rounded-full bg-neutral-100 px-2.5 py-0.5 text-xs font-semibold text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400">
+          <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600 border border-slate-200">
             Archived
           </span>
         );
       case "DRAFT":
       default:
         return (
-          <span className="inline-flex items-center rounded-full bg-rose-50 px-2.5 py-0.5 text-xs font-semibold text-rose-700 dark:bg-rose-950/60 dark:text-rose-300">
+          <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2.5 py-0.5 text-xs font-semibold text-rose-700 border border-rose-200">
+            <span className="h-1.5 w-1.5 rounded-full bg-rose-500"></span>
             Draft
           </span>
         );
@@ -48,21 +49,22 @@ export default async function ProposalsDashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-neutral-50 dark:bg-neutral-950">
+    <div className="min-h-screen bg-slate-50/50 text-slate-900">
       {/* Header / Navigation */}
-      <header className="border-b border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-4 sm:px-6">
+      <header className="border-b border-slate-200 bg-white sticky top-0 z-20 shadow-xs">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3.5 sm:px-6">
           <div className="flex items-center space-x-3">
-            <span className="text-lg font-bold tracking-tight text-neutral-900 dark:text-white">
-              Proposera
-            </span>
-            <span className="rounded-md bg-neutral-100 px-2 py-0.5 text-xs font-medium text-neutral-600 dark:bg-neutral-800 dark:text-neutral-400">
+            <Link href="/" className="flex items-center space-x-2 text-lg font-bold tracking-tight text-slate-900">
+              <span className="text-xl">💍</span>
+              <span className="font-serif">Proposera</span>
+            </Link>
+            <span className="rounded-full bg-rose-50 px-2.5 py-0.5 text-xs font-medium text-rose-700 border border-rose-200/60">
               Creator Studio
             </span>
           </div>
 
           <div className="flex items-center space-x-4">
-            <span className="hidden text-xs text-neutral-500 sm:inline dark:text-neutral-400">
+            <span className="hidden text-xs text-slate-500 sm:inline font-mono">
               {creator.email}
             </span>
             <LogoutButton />
@@ -72,21 +74,20 @@ export default async function ProposalsDashboardPage() {
 
       {/* Main Workspace */}
       <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6">
-
-        {/* Proposals Section */}
-        <div className="mb-6 flex items-center justify-between">
+        {/* Proposals Section Header */}
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-xl font-bold tracking-tight text-neutral-900 dark:text-white">
+            <h1 className="text-2xl font-bold tracking-tight text-slate-900 font-serif">
               My Proposals
             </h1>
-            <p className="text-xs text-neutral-500 dark:text-neutral-400">
-              Proposals created and managed under your account
+            <p className="mt-1 text-xs text-slate-500">
+              Proposals created, authored, and managed under your account
             </p>
           </div>
 
           <Link
             href="/app/proposals/new"
-            className="inline-flex items-center rounded-lg bg-rose-600 px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2"
+            className="inline-flex items-center justify-center rounded-xl bg-rose-600 px-4 py-2.5 text-xs font-bold text-white shadow-sm transition hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2"
           >
             + Create Proposal
           </Link>
@@ -94,22 +95,22 @@ export default async function ProposalsDashboardPage() {
 
         {/* Proposals List or Empty State */}
         {proposals.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-neutral-300 p-12 text-center dark:border-neutral-800">
-            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-rose-50 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400">
+          <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-12 text-center shadow-xs">
+            <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-rose-50 text-2xl text-rose-600 border border-rose-100">
               💍
             </div>
-            <h2 className="text-base font-semibold text-neutral-900 dark:text-white">
+            <h2 className="text-base font-bold text-slate-900 font-serif">
               No proposals created yet
             </h2>
-            <p className="mx-auto mt-1 max-w-sm text-xs text-neutral-500 dark:text-neutral-400">
-              Ready to create something unforgettable? Click the button above to begin authoring your proposal story.
+            <p className="mx-auto mt-1 max-w-sm text-xs text-slate-500 leading-relaxed">
+              Ready to create something unforgettable? Click below to begin authoring your custom romantic proposal story.
             </p>
-            <div className="mt-4">
+            <div className="mt-5">
               <Link
                 href="/app/proposals/new"
-                className="inline-flex items-center rounded-lg bg-rose-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-rose-700"
+                className="inline-flex items-center rounded-xl bg-rose-600 px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-rose-700 transition-colors"
               >
-                Start Proposal
+                Start New Proposal &rarr;
               </Link>
             </div>
           </div>
@@ -118,18 +119,18 @@ export default async function ProposalsDashboardPage() {
             {proposals.map((proposal) => (
               <div
                 key={proposal.id}
-                className="flex flex-col justify-between rounded-xl border border-neutral-200 bg-white p-5 shadow-sm dark:border-neutral-800 dark:bg-neutral-900"
+                className="flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs hover:shadow-md transition-shadow"
               >
                 <div>
                   <div className="flex items-start justify-between gap-2">
-                    <h2 className="text-base font-semibold text-neutral-900 dark:text-white">
+                    <h2 className="text-base font-bold text-slate-900 font-serif line-clamp-1">
                       {proposal.title}
                     </h2>
                     {getStatusBadge(proposal.status)}
                   </div>
-                  <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+                  <p className="mt-1 text-xs text-slate-500">
                     For Partner:{" "}
-                    <span className="font-medium text-neutral-800 dark:text-neutral-200">
+                    <span className="font-semibold text-slate-800">
                       {proposal.partner_name}
                     </span>
                   </p>
@@ -138,30 +139,30 @@ export default async function ProposalsDashboardPage() {
                       href={`/p/${proposal.slug}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mt-1 inline-flex items-center gap-1 font-mono text-xs text-rose-600 hover:underline dark:text-rose-400"
+                      className="mt-2 inline-flex items-center gap-1 font-mono text-xs text-rose-600 hover:text-rose-700 hover:underline"
                       title="Open live proposal"
                     >
                       /p/{proposal.slug} ↗
                     </a>
                   ) : (
-                    <p className="mt-1 text-xs text-neutral-400 font-mono">
+                    <p className="mt-2 text-xs text-slate-400 font-mono">
                       /p/{proposal.slug}
                     </p>
                   )}
                 </div>
 
-                <div className="mt-4 flex items-center justify-between border-t border-neutral-100 pt-3 dark:border-neutral-800">
-                  <div className="text-xs text-neutral-400">
+                <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-3">
+                  <div className="text-xs text-slate-400 font-mono">
                     <span>{new Date(proposal.created_at).toLocaleDateString()}</span>
                   </div>
 
-                  <div className="flex items-center space-x-2">
+                  <div className="flex items-center space-x-1.5">
                     {proposal.status === "PUBLISHED" && (
                       <a
                         href={`/p/${proposal.slug}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="rounded border border-emerald-200 bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-700 hover:bg-emerald-100 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300 dark:hover:bg-emerald-900/60"
+                        className="rounded-lg border border-emerald-300 bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700 hover:bg-emerald-100 transition-colors"
                         title="View live proposal in new tab"
                       >
                         Live ↗
@@ -169,19 +170,19 @@ export default async function ProposalsDashboardPage() {
                     )}
                     <Link
                       href={`/app/proposals/${proposal.id}`}
-                      className="rounded border border-neutral-200 px-2.5 py-1 text-xs font-medium text-neutral-700 hover:bg-neutral-50 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                      className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
                     >
                       Edit
                     </Link>
                     <Link
                       href={`/app/proposals/${proposal.id}/preview`}
-                      className="rounded border border-neutral-200 px-2.5 py-1 text-xs font-medium text-neutral-700 hover:bg-neutral-50 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                      className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
                     >
                       Preview
                     </Link>
                     <Link
                       href={`/app/proposals/${proposal.id}/settings`}
-                      className="rounded border border-neutral-200 px-2.5 py-1 text-xs font-medium text-neutral-700 hover:bg-neutral-50 dark:border-neutral-700 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                      className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
                     >
                       Settings
                     </Link>

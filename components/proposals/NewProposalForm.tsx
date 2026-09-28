@@ -51,18 +51,18 @@ export default function NewProposalForm() {
   };
 
   return (
-    <div className="w-full max-w-xl rounded-2xl border border-neutral-200 bg-white p-6 sm:p-8 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
+    <div className="w-full max-w-xl rounded-2xl border border-slate-200 bg-white p-6 sm:p-8 shadow-sm text-slate-900">
       <div className="mb-6">
         <Link
           href="/app/proposals"
-          className="text-xs font-medium text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors"
         >
-          &larr; Back to Proposals
+          &larr; Back to Dashboard
         </Link>
-        <h1 className="mt-2 text-2xl font-bold tracking-tight text-neutral-900 dark:text-white">
+        <h1 className="mt-3 text-2xl font-bold tracking-tight text-slate-900 font-serif">
           Create New Proposal
         </h1>
-        <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
+        <p className="mt-1 text-sm text-slate-600">
           Initialize your romantic proposal narrative and partner details.
         </p>
       </div>
@@ -71,7 +71,7 @@ export default function NewProposalForm() {
         <div
           role="alert"
           aria-live="polite"
-          className="mb-6 rounded-lg bg-red-50 p-3 text-sm font-medium text-red-700 dark:bg-red-950/50 dark:text-red-300"
+          className="mb-6 rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-700"
         >
           {error}
         </div>
@@ -81,7 +81,7 @@ export default function NewProposalForm() {
         <div>
           <label
             htmlFor="title"
-            className="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+            className="block text-xs font-semibold text-slate-700 uppercase tracking-wider"
           >
             Proposal Title (Internal Name)
           </label>
@@ -92,7 +92,7 @@ export default function NewProposalForm() {
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             disabled={loading}
-            className="mt-1 block w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm shadow-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+            className="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-xs placeholder-slate-400 focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500 disabled:opacity-50"
             placeholder="e.g., Sophia's Rooftop Proposal"
           />
         </div>
@@ -100,7 +100,7 @@ export default function NewProposalForm() {
         <div>
           <label
             htmlFor="partnerName"
-            className="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+            className="block text-xs font-semibold text-slate-700 uppercase tracking-wider"
           >
             Partner&apos;s First Name
           </label>
@@ -111,7 +111,7 @@ export default function NewProposalForm() {
             value={partnerName}
             onChange={(e) => setPartnerName(e.target.value)}
             disabled={loading}
-            className="mt-1 block w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm shadow-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+            className="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-xs placeholder-slate-400 focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500 disabled:opacity-50"
             placeholder="e.g., Sophia"
           />
         </div>
@@ -119,16 +119,16 @@ export default function NewProposalForm() {
         <div>
           <label
             htmlFor="themeId"
-            className="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+            className="block text-xs font-semibold text-slate-700 uppercase tracking-wider"
           >
-            Visual Theme
+            Recipient Visual Theme
           </label>
           <select
             id="themeId"
             value={themeId}
             onChange={(e) => setThemeId(e.target.value)}
             disabled={loading}
-            className="mt-1 block w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm shadow-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+            className="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-xs focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500 disabled:opacity-50 cursor-pointer"
           >
             <option value="midnight-velvet">Midnight Velvet (Dark, Elegant, Intimate)</option>
             <option value="sunset-terrace">Sunset Terrace (Warm, Golden Hour, Romantic)</option>
@@ -139,12 +139,12 @@ export default function NewProposalForm() {
         <div>
           <label
             htmlFor="customSlug"
-            className="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+            className="block text-xs font-semibold text-slate-700 uppercase tracking-wider"
           >
             Custom URL Slug (Optional)
           </label>
-          <div className="mt-1 flex rounded-lg shadow-sm">
-            <span className="inline-flex items-center rounded-l-lg border border-r-0 border-neutral-300 bg-neutral-100 px-3 text-xs text-neutral-500 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-400">
+          <div className="mt-1.5 flex rounded-xl shadow-xs">
+            <span className="inline-flex items-center rounded-l-xl border border-r-0 border-slate-300 bg-slate-50 px-3.5 text-xs font-mono text-slate-500">
               /p/
             </span>
             <input
@@ -153,11 +153,11 @@ export default function NewProposalForm() {
               value={customSlug}
               onChange={(e) => setCustomSlug(e.target.value)}
               disabled={loading}
-              className="block w-full min-w-0 rounded-none rounded-r-lg border border-neutral-300 px-3 py-2 text-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+              className="block w-full min-w-0 rounded-none rounded-r-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500 disabled:opacity-50"
               placeholder="leave blank for secure random slug"
             />
           </div>
-          <p className="mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+          <p className="mt-1.5 text-xs text-slate-500">
             If left blank, an unguessable random slug will be generated automatically.
           </p>
         </div>
@@ -166,9 +166,9 @@ export default function NewProposalForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-lg bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 disabled:opacity-50"
+            className="w-full rounded-xl bg-rose-600 px-4 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 disabled:opacity-50 cursor-pointer"
           >
-            {loading ? "Creating..." : "Create Draft & Open Editor"}
+            {loading ? "Creating..." : "Create Draft & Open Editor \u2192"}
           </button>
         </div>
       </form>

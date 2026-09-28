@@ -4,9 +4,9 @@
 
 **Proposera** is a standalone, personalized proposal-experience platform designed to orchestrate deeply personal and emotional digital journeys for romantic proposals.
 
-- **Current Status**: Milestones 1 through 8 Complete.
-- **Owner & Decision Maker**: Solo-owned and controlled by the project owner (@akrittiii09).
-- **Repository**: `proposera` (Private GitHub Repository).
+- **Current Status**: Release 1.0 Production Ready.
+- **Owner & Lead Developer**: @akrittiii09.
+- **Repository**: `akrittiii09/proposera` (Public GitHub Repository).
 
 ---
 

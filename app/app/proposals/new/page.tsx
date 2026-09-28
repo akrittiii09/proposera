@@ -10,7 +10,7 @@ export default async function NewProposalPage() {
   await requireAuth();
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-neutral-50 p-4 sm:p-6 lg:p-8 dark:bg-neutral-950">
+    <div className="flex min-h-screen items-center justify-center bg-slate-50/60 p-4 sm:p-6 lg:p-8 text-slate-900">
       <NewProposalForm />
     </div>
   );

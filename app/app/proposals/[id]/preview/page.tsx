@@ -62,55 +62,60 @@ export default async function ProposalPreviewPage({ params }: ProposalPreviewPag
   const currentTheme = themeClasses[proposal.theme_id] || themeClasses["midnight-velvet"];
 
   return (
-    <div className="min-h-screen bg-neutral-100 py-8 dark:bg-neutral-900">
-      <div className="mx-auto max-w-4xl px-4">
+    <div className="min-h-screen bg-slate-50/50 py-8 text-slate-900">
+      <div className="mx-auto max-w-4xl px-4 sm:px-6">
         {/* Navigation Bar */}
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 bg-white p-5 rounded-2xl shadow-xs">
           <div className="flex items-center space-x-4">
             <Link
               href={`/app/proposals/${proposal.id}`}
-              className="text-sm font-medium text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors"
             >
               &larr; Back to Editor
             </Link>
-            <span className="text-xs font-semibold uppercase tracking-wider text-rose-600 dark:text-rose-400">
+            <span className="rounded-full bg-rose-50 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider text-rose-700 border border-rose-200/60">
               Studio Sandbox Preview
             </span>
           </div>
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-3">
             <span
-              className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+              className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold border ${
                 proposal.status === "PUBLISHED"
-                  ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300"
-                  : "bg-neutral-200 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-300"
+                  ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                  : "bg-slate-100 text-slate-700 border-slate-200"
               }`}
             >
+              <span
+                className={`h-1.5 w-1.5 rounded-full ${
+                  proposal.status === "PUBLISHED" ? "bg-emerald-500" : "bg-slate-400"
+                }`}
+              />
               Status: {proposal.status}
             </span>
             <Link
               href={`/app/proposals/${proposal.id}/settings`}
-              className="rounded-lg bg-neutral-800 px-3 py-1.5 text-xs font-medium text-white hover:bg-neutral-700 dark:bg-neutral-700 dark:hover:bg-neutral-600"
+              className="rounded-xl border border-slate-300 bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-xs hover:bg-slate-50 transition-colors"
             >
               Settings &amp; Publish
             </Link>
           </div>
         </div>
 
-        <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-center text-xs text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/40 dark:text-amber-300">
-          <strong>Creator Sandbox:</strong> This is an authentic preview of how your proposal appears to your recipient. No live response can be recorded in preview mode.
+        <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50/80 p-4 text-center text-xs text-amber-900 shadow-xs">
+          <strong>Creator Sandbox:</strong> This is an authentic preview simulating how your proposal appears to your recipient. Interactive responses are recorded only on the live published link.
         </div>
 
-        {/* Mobile Viewport Simulation Frame */}
-        <div className="mx-auto max-w-sm rounded-[2.5rem] border-8 border-neutral-800 bg-neutral-900 p-2 shadow-2xl">
+        {/* Mobile Viewport Simulation Frame (Preserves Cinematic Proposal Theme) */}
+        <div className="mx-auto max-w-sm rounded-[2.5rem] border-8 border-slate-800 bg-slate-900 p-2 shadow-2xl">
           <div className={`relative flex min-h-[600px] flex-col justify-between overflow-hidden rounded-[2rem] p-6 ${currentTheme.bg} ${currentTheme.text}`}>
             {/* Top decorative element */}
             <div className="text-center pt-4">
-              <div className="mx-auto mb-2 h-1 w-12 rounded-full bg-neutral-600/40" />
+              <div className="mx-auto mb-2 h-1 w-12 rounded-full bg-slate-600/40" />
               <p className="text-xs font-medium uppercase tracking-widest opacity-70">
                 A Special Message For
               </p>
-              <h2 className={`mt-1 text-2xl font-bold tracking-tight ${currentTheme.accent}`}>
+              <h2 className={`mt-1 text-2xl font-bold tracking-tight font-serif ${currentTheme.accent}`}>
                 {proposal.partner_name}
               </h2>
             </div>
@@ -142,7 +147,7 @@ export default async function ProposalPreviewPage({ params }: ProposalPreviewPag
 
             {/* Climax Question */}
             <div className="text-center pb-6">
-              <h3 className={`text-xl font-bold tracking-tight ${currentTheme.accent}`}>
+              <h3 className={`text-xl font-bold tracking-tight font-serif ${currentTheme.accent}`}>
                 {storyContent.question || "Will you marry me?"}
               </h3>
 
@@ -154,7 +159,7 @@ export default async function ProposalPreviewPage({ params }: ProposalPreviewPag
                 >
                   YES, ALWAYS &amp; FOREVER 💍
                 </button>
-                <p className="text-[10px] opacity-60">Interactive response available only on published URL</p>
+                <p className="text-[10px] opacity-60">Interactive response available on published URL</p>
               </div>
             </div>
           </div>

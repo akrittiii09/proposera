@@ -53,13 +53,19 @@ export default function RegisterForm() {
   };
 
   return (
-    <div className="w-full max-w-md rounded-2xl border border-neutral-200 bg-white p-8 shadow-sm dark:border-neutral-800 dark:bg-neutral-900">
+    <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
       <div className="mb-6 text-center">
-        <h1 className="text-2xl font-bold tracking-tight text-neutral-900 dark:text-neutral-50">
+        <Link href="/" className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-700 mb-4 transition-colors">
+          &larr; Back to Proposera
+        </Link>
+        <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-rose-50 text-2xl text-rose-600 border border-rose-100">
+          💍
+        </div>
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900 font-serif">
           Create Creator Account
         </h1>
-        <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-400">
-          Sign up to begin authoring proposal experiences
+        <p className="mt-1 text-sm text-slate-600">
+          Sign up to begin authoring proposal experiences for free
         </p>
       </div>
 
@@ -67,7 +73,7 @@ export default function RegisterForm() {
         <div
           role="alert"
           aria-live="polite"
-          className="mb-4 rounded-lg bg-red-50 p-3 text-sm font-medium text-red-700 dark:bg-red-950/50 dark:text-red-300"
+          className="mb-4 rounded-xl border border-red-200 bg-red-50 p-3 text-sm font-medium text-red-700"
         >
           {error}
         </div>
@@ -77,7 +83,7 @@ export default function RegisterForm() {
         <div>
           <label
             htmlFor="email"
-            className="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+            className="block text-sm font-medium text-slate-700"
           >
             Email Address
           </label>
@@ -90,7 +96,7 @@ export default function RegisterForm() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             disabled={loading}
-            className="mt-1 block w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm shadow-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+            className="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm placeholder-slate-400 transition-colors focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500 disabled:opacity-50"
             placeholder="you@example.com"
           />
         </div>
@@ -98,7 +104,7 @@ export default function RegisterForm() {
         <div>
           <label
             htmlFor="password"
-            className="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+            className="block text-sm font-medium text-slate-700"
           >
             Password (min. 8 characters)
           </label>
@@ -111,7 +117,7 @@ export default function RegisterForm() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             disabled={loading}
-            className="mt-1 block w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm shadow-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+            className="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm placeholder-slate-400 transition-colors focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500 disabled:opacity-50"
             placeholder="••••••••"
           />
         </div>
@@ -119,7 +125,7 @@ export default function RegisterForm() {
         <div>
           <label
             htmlFor="confirmPassword"
-            className="block text-sm font-medium text-neutral-700 dark:text-neutral-300"
+            className="block text-sm font-medium text-slate-700"
           >
             Confirm Password
           </label>
@@ -132,7 +138,7 @@ export default function RegisterForm() {
             value={confirmPassword}
             onChange={(e) => setConfirmPassword(e.target.value)}
             disabled={loading}
-            className="mt-1 block w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm shadow-sm focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500 dark:border-neutral-700 dark:bg-neutral-800 dark:text-white"
+            className="mt-1 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 shadow-sm placeholder-slate-400 transition-colors focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500 disabled:opacity-50"
             placeholder="••••••••"
           />
         </div>
@@ -140,17 +146,17 @@ export default function RegisterForm() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-lg bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 disabled:opacity-50"
+          className="w-full rounded-lg bg-rose-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 disabled:opacity-50 cursor-pointer"
         >
           {loading ? "Creating Account..." : "Create Account"}
         </button>
       </form>
 
-      <div className="mt-6 text-center text-sm text-neutral-600 dark:text-neutral-400">
+      <div className="mt-6 text-center text-sm text-slate-600">
         Already have an account?{" "}
         <Link
           href="/login"
-          className="font-medium text-rose-600 hover:text-rose-500 dark:text-rose-400"
+          className="font-medium text-rose-600 hover:text-rose-700"
         >
           Sign in
         </Link>
