@@ -62,7 +62,7 @@ export default function ThemeCustomizer({
                 key={t.id}
                 type="button"
                 onClick={() => onThemeChange(t.id)}
-                className={`relative flex flex-col text-left p-3.5 rounded-2xl border-2 transition-all cursor-pointer ${
+                className={`relative flex flex-col text-left p-3.5 rounded-2xl border-2 transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-rose-500 ${
                   isSelected
                     ? "border-rose-500 ring-2 ring-rose-500/20 shadow-md bg-white"
                     : "border-slate-200 bg-slate-50/50 hover:border-slate-300 hover:bg-white"
@@ -129,7 +129,7 @@ export default function ThemeCustomizer({
                 key={m.id}
                 type="button"
                 onClick={() => onColorMoodChange(m.id)}
-                className={`group flex items-center space-x-2 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all cursor-pointer ${
+                className={`group flex items-center space-x-2 px-3 py-1.5 rounded-xl border text-xs font-medium transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-rose-500 ${
                   isChosen
                     ? "border-slate-800 bg-slate-900 text-white shadow-xs"
                     : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
@@ -175,9 +175,9 @@ export default function ThemeCustomizer({
                   key={`prop-${emo}`}
                   type="button"
                   onClick={() => onProposalEmojiChange(emo)}
-                  className={`w-8 h-8 rounded-lg text-lg flex items-center justify-center transition-transform hover:scale-110 cursor-pointer ${
+                  className={`w-8 h-8 rounded-lg text-lg flex items-center justify-center transition-transform hover:scale-110 cursor-pointer focus:outline-none focus:ring-2 focus:ring-rose-500 ${
                     (proposalEmoji || currentResolved.definition.emoji) === emo
-                      ? "bg-rose-100 border border-rose-300"
+                      ? "bg-rose-100 border border-rose-300 ring-2 ring-rose-400"
                       : "hover:bg-white"
                   }`}
                   aria-label={`Select emoji ${emo}`}
@@ -207,9 +207,9 @@ export default function ThemeCustomizer({
                   key={`celeb-${emo}`}
                   type="button"
                   onClick={() => onCelebrationEmojiChange(emo)}
-                  className={`w-8 h-8 rounded-lg text-lg flex items-center justify-center transition-transform hover:scale-110 cursor-pointer ${
+                  className={`w-8 h-8 rounded-lg text-lg flex items-center justify-center transition-transform hover:scale-110 cursor-pointer focus:outline-none focus:ring-2 focus:ring-rose-500 ${
                     (celebrationEmoji || "💍") === emo
-                      ? "bg-rose-100 border border-rose-300"
+                      ? "bg-rose-100 border border-rose-300 ring-2 ring-rose-400"
                       : "hover:bg-white"
                   }`}
                   aria-label={`Select celebration emoji ${emo}`}

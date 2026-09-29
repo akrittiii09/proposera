@@ -99,11 +99,16 @@ export default async function ProposalPreviewPage({ params }: ProposalPreviewPag
           <div className={`relative flex min-h-[600px] flex-col justify-between overflow-hidden rounded-[2rem] p-6 ${currentTheme.bg} ${currentTheme.text}`}>
             {/* Top decorative element */}
             <div className="text-center pt-4">
-              <div className="mx-auto mb-2 h-1 w-12 rounded-full bg-slate-600/40" />
+              <div
+                className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-white/5 text-2xl shadow-inner border border-white/10"
+                aria-hidden="true"
+              >
+                {resolvedTheme.proposalEmoji || "💌"}
+              </div>
               <p className="text-xs font-medium uppercase tracking-widest opacity-70">
                 A Special Message For
               </p>
-              <h2 className={`mt-1 text-2xl font-bold tracking-tight font-serif ${currentTheme.accent}`}>
+              <h2 className={`mt-1 text-2xl font-bold tracking-tight font-serif break-words ${currentTheme.accent}`}>
                 {proposal.partner_name}
               </h2>
             </div>
@@ -145,7 +150,7 @@ export default async function ProposalPreviewPage({ params }: ProposalPreviewPag
                   disabled
                   className={`w-full cursor-not-allowed rounded-full py-3 text-sm font-bold opacity-90 shadow-lg ${currentTheme.btnPrimary}`}
                 >
-                  YES, ALWAYS &amp; FOREVER 💍
+                  YES, ALWAYS &amp; FOREVER {resolvedTheme.celebrationEmoji || "💍"}
                 </button>
                 <p className="text-[10px] opacity-60">Interactive response available on published URL</p>
               </div>

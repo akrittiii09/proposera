@@ -58,6 +58,25 @@ export const LoginSchema = z.object({
 export type LoginInput = z.infer<typeof LoginSchema>;
 
 /**
+ * All 13 Supported Theme Identifiers
+ */
+export const ThemeIdSchema = z.enum([
+  "midnight-velvet",
+  "sunset-terrace",
+  "celestial-rose",
+  "cherry-blossom",
+  "ocean-love",
+  "enchanted-garden",
+  "golden-hour",
+  "lavender-dreams",
+  "cozy-love",
+  "starlit-night",
+  "strawberry-kiss",
+  "cloud-nine",
+  "classic-romance",
+]);
+
+/**
  * Proposal Initialization Schema (docs/PRODUCT_SPEC.md).
  */
 export const CreateProposalSchema = z.object({
@@ -71,7 +90,7 @@ export const CreateProposalSchema = z.object({
     .trim()
     .min(1, "Partner name is required")
     .max(100, "Partner name cannot exceed 100 characters"),
-  themeId: z.string().trim().default("midnight-velvet"),
+  themeId: ThemeIdSchema.default("midnight-velvet"),
   slug: SlugSchema.optional(),
 });
 
@@ -83,10 +102,10 @@ export type CreateProposalInput = z.infer<typeof CreateProposalSchema>;
 export const UpdateProposalSchema = z.object({
   title: z.string().trim().min(1).max(100).optional(),
   partnerName: z.string().trim().min(1).max(100).optional(),
-  themeId: z.string().trim().optional(),
+  themeId: ThemeIdSchema.optional(),
   slug: SlugSchema.optional(),
   status: z.enum(["DRAFT", "PUBLISHED", "UNPUBLISHED", "ARCHIVED", "DELETED"]).optional(),
-  customThemeOverrides: z.record(z.string(), z.unknown()).optional(),
+  customThemeOverrides: ThemeCustomizationSchema.optional(),
   storyContent: z.record(z.string(), z.unknown()).optional(),
 });
 
