@@ -11,6 +11,21 @@ export const SlugSchema = z
   .regex(/^[a-z0-9-]+$/, "Slug may only contain lowercase letters, numbers, and hyphens");
 
 /**
+ * Theme & Personalization Customization Schema
+ */
+export const ThemeCustomizationSchema = z
+  .object({
+    color_mood: z
+      .enum(["rose", "red", "pink", "lavender", "purple", "blue", "teal", "green", "peach", "gold"])
+      .optional()
+      .nullable(),
+    proposal_emoji: z.string().trim().max(16).optional().nullable(),
+    celebration_emoji: z.string().trim().max(16).optional().nullable(),
+    audio_track_id: z.string().trim().max(64).optional().nullable(),
+  })
+  .passthrough();
+
+/**
  * Creator Registration Schema (Public creator signup per DEC-008 / Q1).
  */
 export const RegisterSchema = z.object({

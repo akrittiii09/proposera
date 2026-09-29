@@ -5,6 +5,8 @@ import { requireAuth } from "@/lib/auth/requireAuth";
 import { getDb } from "@/lib/db";
 import { findProposalById } from "@/lib/db/repositories";
 
+import { resolveTheme } from "@/lib/themes";
+
 interface ProposalPreviewPageProps {
   params: Promise<{
     id: string;
@@ -38,28 +40,14 @@ export default async function ProposalPreviewPage({ params }: ProposalPreviewPag
 
   const mediaSrc = storyContent.mediaUrl || (storyContent.cover_media_id ? `/api/media/${storyContent.cover_media_id}` : null);
 
-  const themeClasses: Record<string, { bg: string; card: string; text: string; accent: string }> = {
-    "midnight-velvet": {
-      bg: "bg-slate-950",
-      card: "bg-slate-900/80 border-slate-800",
-      text: "text-slate-100",
-      accent: "text-rose-400",
-    },
-    "sunset-terrace": {
-      bg: "bg-amber-950",
-      card: "bg-amber-900/70 border-amber-800",
-      text: "text-amber-100",
-      accent: "text-amber-400",
-    },
-    "celestial-rose": {
-      bg: "bg-purple-950",
-      card: "bg-purple-900/80 border-purple-800",
-      text: "text-purple-100",
-      accent: "text-pink-400",
-    },
+  const resolvedTheme = resolveTheme(proposal.theme_id, proposal.custom_theme_overrides);
+  const currentTheme = {
+    bg: resolvedTheme.colors.bg,
+    card: resolvedTheme.colors.cardBg,
+    text: resolvedTheme.colors.textPrimary,
+    accent: resolvedTheme.colors.accent,
+    btnPrimary: resolvedTheme.colors.btnPrimary,
   };
-
-  const currentTheme = themeClasses[proposal.theme_id] || themeClasses["midnight-velvet"];
 
   return (
     <div className="min-h-screen bg-slate-50/50 py-8 text-slate-900">
@@ -155,7 +143,7 @@ export default async function ProposalPreviewPage({ params }: ProposalPreviewPag
                 <button
                   type="button"
                   disabled
-                  className="w-full cursor-not-allowed rounded-full bg-rose-600 py-3 text-sm font-bold text-white opacity-90 shadow-lg"
+                  className={`w-full cursor-not-allowed rounded-full py-3 text-sm font-bold opacity-90 shadow-lg ${currentTheme.btnPrimary}`}
                 >
                   YES, ALWAYS &amp; FOREVER 💍
                 </button>

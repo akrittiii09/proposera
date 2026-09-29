@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from "react";
 import { PublicProposalProjection } from "@/lib/db/repositories";
 import { useAmbientAudio } from "@/components/audio/useAmbientAudio";
 import AmbientAudioControl from "@/components/audio/AmbientAudioControl";
+import { resolveTheme } from "@/lib/themes";
 
 export interface SceneOrchestratorProps {
   proposal: PublicProposalProjection;
@@ -107,49 +108,11 @@ export default function SceneOrchestrator({
     setCurrentScene(2);
   };
 
-  // Theme visual styling tokens
-  const themeMap: Record<
-    string,
-    {
-      bg: string;
-      cardBg: string;
-      textPrimary: string;
-      textSecondary: string;
-      accent: string;
-      btnPrimary: string;
-      btnSecondary: string;
-    }
-  > = {
-    "midnight-velvet": {
-      bg: "bg-slate-950",
-      cardBg: "bg-slate-900/90 border-slate-800",
-      textPrimary: "text-slate-100",
-      textSecondary: "text-slate-400",
-      accent: "text-rose-400",
-      btnPrimary: "bg-rose-600 hover:bg-rose-500 text-white shadow-rose-950/50",
-      btnSecondary: "bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700",
-    },
-    "sunset-terrace": {
-      bg: "bg-amber-950",
-      cardBg: "bg-amber-900/80 border-amber-800/80",
-      textPrimary: "text-amber-50",
-      textSecondary: "text-amber-300/70",
-      accent: "text-amber-400",
-      btnPrimary: "bg-amber-600 hover:bg-amber-500 text-amber-950 font-bold shadow-amber-950/50",
-      btnSecondary: "bg-amber-900/60 hover:bg-amber-800 text-amber-200 border-amber-800",
-    },
-    "celestial-rose": {
-      bg: "bg-purple-950",
-      cardBg: "bg-purple-900/80 border-purple-800/80",
-      textPrimary: "text-purple-50",
-      textSecondary: "text-purple-300/80",
-      accent: "text-pink-400",
-      btnPrimary: "bg-pink-600 hover:bg-pink-500 text-white shadow-pink-950/50",
-      btnSecondary: "bg-purple-900 hover:bg-purple-800 text-purple-200 border-purple-800",
-    },
-  };
-
-  const currentTheme = themeMap[proposal.theme_id] || themeMap["midnight-velvet"];
+  // Centralized Theme Resolution (Release 1.1)
+  const resolvedTheme = resolveTheme(proposal.theme_id, proposal.custom_theme_overrides);
+  const currentTheme = resolvedTheme.colors;
+  const proposalEmoji = resolvedTheme.proposalEmoji;
+  const celebrationEmoji = resolvedTheme.celebrationEmoji;
 
   // Handle Response Submission (Strict: never fake celebration if API fails)
   const handleResponseSubmit = async (choice: string) => {
@@ -233,8 +196,8 @@ export default function SceneOrchestrator({
             data-testid="scene-1"
             className="flex flex-col items-center text-center space-y-6 animate-fadeIn py-6"
           >
-            <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center text-3xl shadow-inner mb-2 border border-white/10">
-              💌
+            <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center text-3xl shadow-inner mb-2 border border-white/10" aria-hidden="true">
+              {proposalEmoji || "💌"}
             </div>
             <div>
               <p className={`text-xs font-semibold tracking-widest uppercase ${currentTheme.accent}`}>
@@ -440,13 +403,13 @@ export default function SceneOrchestrator({
           >
             {/* Visual celebration effects (particle simulation or accessible static typography) */}
             {!prefersReducedMotion ? (
-              <div className="relative flex items-center justify-center">
-                <div className="text-6xl animate-bounce">🎉</div>
+              <div className="relative flex items-center justify-center" aria-hidden="true">
+                <div className="text-6xl animate-bounce">{celebrationEmoji || "💍"}</div>
                 <span className="absolute -top-3 -right-4 text-3xl animate-pulse">✨</span>
                 <span className="absolute -bottom-2 -left-4 text-3xl animate-pulse">💖</span>
               </div>
             ) : (
-              <div className="text-6xl">💍</div>
+              <div className="text-6xl" aria-hidden="true">{celebrationEmoji || "💍"}</div>
             )}
 
             <div className="space-y-3">

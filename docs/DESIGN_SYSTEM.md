@@ -147,3 +147,47 @@ Design tokens are categorized semantically to ensure that changing a theme modif
 - **Theme Interface**: A theme is defined as a cohesive implementation of semantic design tokens and specialized scene styling wrappers.
 - **Zero Content Knowledge**: Themes ingest standardized semantic data contracts. They never manipulate or persist content.
 - **Theme Switching Guarantee**: If a creator selects a new theme, the Scene Engine instantly replaces the theme provider wrapper. The underlying content is untouched, perfectly preserved, and completely uncorrupted.
+
+---
+
+## 7. Release 1.1 Theme & Personalization Architecture
+
+### 7.1 Available Themes (13 Total)
+
+Proposera provides 13 distinctive visual themes (3 preserved 1.0 originals + 10 new Release 1.1 themes), each designed with dedicated color balances, atmospheric glow, and decorative motifs:
+
+| ID | Name | Emoji | Mood & Ambience | Representative Accent | Default Color Mood |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `midnight-velvet` | Midnight Velvet | 🍷 | Deep nocturnal elegance, velvet slate, intimate romance | `#f43f5e` | `rose` |
+| `sunset-terrace` | Sunset Terrace | 🌅 | Warm twilight glow, golden Mediterranean terrace | `#f59e0b` | `gold` |
+| `celestial-rose` | Celestial Rose | ✨ | Starlit dusk, cosmic royal purple, shimmering rose | `#ec4899` | `pink` |
+| `cherry-blossom` | Cherry Blossom | 🌸 | Soft springtime romance, blush petals, rosewood | `#fb7185` | `pink` |
+| `ocean-love` | Ocean Love | 🌊 | Dreamy, tranquil twilight tides, bioluminescent aqua | `#2dd4bf` | `teal` |
+| `enchanted-garden` | Enchanted Garden | 🌿 | Botanical sanctuary, evergreen moss, silvery sage | `#34d399` | `green` |
+| `golden-hour` | Golden Hour | 🌇 | Intimate sunset warmth, peach, honey amber | `#f97316` | `peach` |
+| `lavender-dreams` | Lavender Dreams | 💜 | Wistful lullaby, blossoming lilac, starlight | `#c084fc` | `lavender` |
+| `cozy-love` | Cozy Love | 🧸 | Heartwarming embrace, cocoa, caramel, cinnamon | `#f59e0b` | `peach` |
+| `starlit-night` | Starlit Night | 🌌 | Celestial obsidian, constellation indigo, pulsar white | `#818cf8` | `blue` |
+| `strawberry-kiss` | Strawberry Kiss | 🍓 | Playful ruby berries, strawberry scarlet, berry cream | `#f43f5e` | `red` |
+| `cloud-nine` | Cloud Nine | ☁️ | Ethereal weightlessness, atmospheric misty cyan | `#38bdf8` | `blue` |
+| `classic-romance` | Classic Romance | 🖤 | Timeless black-tie noir, ivory silk, champagne gold | `#e11d48` | `rose` |
+
+### 7.2 Color Mood System
+
+Creators can customize the proposal's interactive buttons, highlights, and accent accents without raw arbitrary hex injection. The 10 accessible color moods are:
+- `rose`, `red`, `pink`, `lavender`, `purple`, `blue`, `teal`, `green`, `peach`, `gold`.
+
+Each mood maps to high-contrast WCAG 2.1 AA accessible button and text tokens.
+
+### 7.3 Curated Emoji Personalization
+
+Creators may optionally designate:
+- **Proposal-level Header Emoji**: Displays in the intro scene hero card.
+- **Celebration Climax Emoji**: Displays in the Scene 5 affirmative celebration sequence.
+- Curated Collection: `💍 ❤️ 💕 💖 🥹 🌹 ✨ 🫶🏻 🧸 🌸 🌙 💫 🦋 🍓 ☁️ 💐 🥰 💞 ⭐ 🎀`
+
+### 7.4 Safe Fallbacks & Determinism
+
+- Unknown/corrupted theme IDs deterministically fall back to `midnight-velvet`.
+- Empty or omitted color moods preserve the theme's tested default styling.
+- Missing or invalid emoji fall back gracefully without breaking screen-reader announcements or throwing runtime exceptions.

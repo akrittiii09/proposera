@@ -4,6 +4,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { ProposalRecord } from "@/lib/db/repositories";
+import ThemeCustomizer from "./ThemeCustomizer";
+import { ThemeId, ColorMoodId, ProposalThemeCustomization } from "@/lib/themes";
 
 interface ProposalEditorProps {
   proposal: ProposalRecord;
@@ -13,7 +15,25 @@ export default function ProposalEditor({ proposal: initialProposal }: ProposalEd
   const [proposal, setProposal] = useState<ProposalRecord>(initialProposal);
   const [title, setTitle] = useState(proposal.title);
   const [partnerName, setPartnerName] = useState(proposal.partner_name);
-  const [themeId, setThemeId] = useState(proposal.theme_id);
+  const [themeId, setThemeId] = useState<ThemeId>(proposal.theme_id as ThemeId);
+
+  // Custom Theme Overrides parsing
+  let initialThemeOverrides: ProposalThemeCustomization = {};
+  try {
+    initialThemeOverrides = JSON.parse(proposal.custom_theme_overrides);
+  } catch {
+    initialThemeOverrides = {};
+  }
+
+  const [colorMood, setColorMood] = useState<ColorMoodId | null>(
+    (initialThemeOverrides.color_mood as ColorMoodId) || null
+  );
+  const [proposalEmoji, setProposalEmoji] = useState<string | null>(
+    initialThemeOverrides.proposal_emoji || null
+  );
+  const [celebrationEmoji, setCelebrationEmoji] = useState<string | null>(
+    initialThemeOverrides.celebration_emoji || null
+  );
 
   // Story Content parsing
   let initialStory: {
@@ -124,6 +144,13 @@ export default function ProposalEditor({ proposal: initialProposal }: ProposalEd
         mediaUrl: mediaUrl || (coverMediaId ? `/api/media/${coverMediaId}` : null),
       };
 
+      const customThemeOverrides: ProposalThemeCustomization = {
+        ...initialThemeOverrides,
+        color_mood: colorMood,
+        proposal_emoji: proposalEmoji,
+        celebration_emoji: celebrationEmoji,
+      };
+
       const res = await fetch(`/api/proposals/${proposal.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -131,6 +158,7 @@ export default function ProposalEditor({ proposal: initialProposal }: ProposalEd
           title,
           partnerName,
           themeId,
+          customThemeOverrides,
           storyContent,
         }),
       });
@@ -280,25 +308,26 @@ export default function ProposalEditor({ proposal: initialProposal }: ProposalEd
                 />
               </div>
 
-              <div className="sm:col-span-2">
-                <label
-                  htmlFor="themeId"
-                  className="block text-xs font-semibold text-slate-700 uppercase tracking-wider"
-                >
-                  Visual Theme (Recipient Experience)
-                </label>
-                <select
-                  id="themeId"
-                  value={themeId}
-                  onChange={(e) => setThemeId(e.target.value)}
-                  className="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-xs focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500 cursor-pointer"
-                >
-                  <option value="midnight-velvet">Midnight Velvet (Dark, Elegant, Intimate)</option>
-                  <option value="sunset-terrace">Sunset Terrace (Warm & Golden Hour)</option>
-                  <option value="celestial-rose">Celestial Rose (Soft Pastels & Starry)</option>
-                </select>
-              </div>
             </div>
+          </div>
+
+          {/* Release 1.1: Theme Expansion & Personalization Studio */}
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-7 shadow-xs">
+            <h2 className="text-base font-bold text-slate-900 font-serif mb-4">
+              Visual Theme &amp; Personalization
+            </h2>
+            <ThemeCustomizer
+              selectedThemeId={themeId}
+              onThemeChange={(newTheme) => setThemeId(newTheme)}
+              selectedColorMood={colorMood}
+              onColorMoodChange={(newMood) => setColorMood(newMood)}
+              proposalEmoji={proposalEmoji}
+              onProposalEmojiChange={(newEmoji) => setProposalEmoji(newEmoji)}
+              celebrationEmoji={celebrationEmoji}
+              onCelebrationEmojiChange={(newEmoji) => setCelebrationEmoji(newEmoji)}
+              samplePartnerName={partnerName}
+              showLivePreview={true}
+            />
           </div>
 
           {/* Narrative & Proposal Content */}

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { THEME_LIST } from "@/lib/themes";
 
 export default function NewProposalForm() {
   const router = useRouter();
@@ -130,9 +131,11 @@ export default function NewProposalForm() {
             disabled={loading}
             className="mt-1.5 block w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 text-sm text-slate-900 shadow-xs focus:border-rose-500 focus:outline-none focus:ring-1 focus:ring-rose-500 disabled:opacity-50 cursor-pointer"
           >
-            <option value="midnight-velvet">Midnight Velvet (Dark, Elegant, Intimate)</option>
-            <option value="sunset-terrace">Sunset Terrace (Warm, Golden Hour, Romantic)</option>
-            <option value="celestial-rose">Celestial Rose (Soft Pastels, Starry, Whimsical)</option>
+            {THEME_LIST.map((theme) => (
+              <option key={theme.id} value={theme.id}>
+                {theme.name} {theme.emoji} — {theme.moodDescription}
+              </option>
+            ))}
           </select>
         </div>
 
